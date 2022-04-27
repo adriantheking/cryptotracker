@@ -1,9 +1,16 @@
+using Common.Connectors;
+using Common.Connectors.Interfaces;
+using Common.Options;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddSingleton<IZonda, Zonda>();
 
+//options 
+builder.Services.AddOptions<ZondaConnectorOptions>("ZondaConnectorOptions");
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
