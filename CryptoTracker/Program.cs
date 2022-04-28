@@ -5,12 +5,12 @@ using Common.Options;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddLogging();
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IZonda, Zonda>();
 
 //options 
-builder.Services.AddOptions<ZondaConnectorOptions>("ZondaConnectorOptions");
+builder.Services.Configure<ZondaConnectorOptions>(builder.Configuration.GetSection(ZondaConnectorOptions.SectionName));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -18,6 +18,10 @@ if (!app.Environment.IsDevelopment())
 {
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+else
+{
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
