@@ -9,6 +9,10 @@ namespace Common.Connectors
 {
     public abstract class Connector
     {
-        protected abstract void PrepareRequest(RestClient restClient);
+        /// <summary>
+        /// Method should be responsible for preparing request headers  
+        /// </summary>
+        /// <param name="restClient"></param>
+        protected abstract void PrepareHeaders(RestClient restClient);
     }
 }

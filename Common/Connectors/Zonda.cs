@@ -29,12 +29,13 @@ namespace Common.Connectors
             RestRequest request = new RestRequest(ZondaEndpoints.TransactionHistoryEndpoint, Method.Get);
             try
             {
-                PrepareRequest(restClient);
+                PrepareHeaders(restClient);
                 var response = await restClient.ExecuteAsync(request);
 
                 if (response.IsSuccessful && response.Content != null)
                 {
                     var transactionHistory = JsonConvert.DeserializeObject<ZondaTransactionHistoryModel>(response.Content);
+                    return transactionHistory;
                 }
 
             }
@@ -89,7 +90,7 @@ namespace Common.Connectors
             return output.ToString();
         }
 
-        protected override void PrepareRequest(RestClient restClient)
+        protected override void PrepareHeaders(RestClient restClient)
         {
             restClient.AddDefaultHeader("Accept", "application/json");
             restClient.AddDefaultHeader("Content-Type", "application/json");
