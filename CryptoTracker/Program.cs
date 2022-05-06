@@ -1,14 +1,18 @@
 using Common.Connectors;
 using Common.Connectors.Interfaces;
 using Common.Options;
+using Common.Services;
+using Common.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddLogging();
 builder.Services.AddControllersWithViews();
+//connectors
 builder.Services.AddSingleton<IZonda, Zonda>();
-
+//services
+builder.Services.AddTransient<ITransactionService, TransactionService>();
 //options 
 builder.Services.Configure<ZondaConnectorOptions>(builder.Configuration.GetSection(ZondaConnectorOptions.SectionName));
 var app = builder.Build();

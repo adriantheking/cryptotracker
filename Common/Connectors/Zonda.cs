@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 
 namespace Common.Connectors
 {
-    public class Zonda : Connector, IZonda, IDisposable
+    public class Zonda : IZonda, IDisposable
     {
         private readonly RestClient restClient;
         private readonly ZondaConnectorOptions options;
@@ -24,27 +24,35 @@ namespace Common.Connectors
             restClient = new RestClient(this.options.BaseUrl);
             this.logger = logger;
         }
-        public async Task<string> GetTransactionsAsync()
+        public async Task<ZondaTransactionHistoryModel> GetTransactionsAsync()
         {
-            RestRequest request = new RestRequest(ZondaEndpoints.TransactionHistoryEndpoint, Method.Get);
-            try
-            {
-                PrepareHeaders(restClient);
-                var response = await restClient.ExecuteAsync(request);
+            PrepareHeaders(restClient);
+            string nextPageCursor = null;
 
-                if (response.IsSuccessful && response.Content != null)
+            do
+            {
+                RestRequest request = new RestRequest(ZondaEndpoints.TransactionHistoryEndpoint, Method.Get);
+                try
                 {
-                    var transactionHistory = JsonConvert.DeserializeObject<ZondaTransactionHistoryModel>(response.Content);
-                    return transactionHistory;
+                    var response = await restClient.ExecuteAsync(request);
+
+                    if (response.IsSuccessful && response.Content != null)
+                    {
+                        var transactionHistory = JsonConvert.DeserializeObject<ZondaTransactionHistoryModel>(response.Content);
+                        return transactionHistory;
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, ex?.Message, ex?.InnerException);
+                    throw;
                 }
 
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, ex?.Message, ex?.InnerException);
-                throw;
-            }
-            return "abc";
+                return new ZondaTransactionHistoryModel();
+
+            } while (nextPageCursor != null);
+
         }
 
         public RestClientOptions? SetRestOptions() => new RestClientOptions()
@@ -90,7 +98,7 @@ namespace Common.Connectors
             return output.ToString();
         }
 
-        protected override void PrepareHeaders(RestClient restClient)
+        private void PrepareHeaders(RestClient restClient)
         {
             restClient.AddDefaultHeader("Accept", "application/json");
             restClient.AddDefaultHeader("Content-Type", "application/json");
