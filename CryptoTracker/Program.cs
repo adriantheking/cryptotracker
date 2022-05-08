@@ -12,7 +12,7 @@ builder.Services.AddControllersWithViews();
 //connectors
 builder.Services.AddSingleton<IZonda, Zonda>();
 //services
-builder.Services.AddTransient<ITransactionService, TransactionService>();
+builder.Services.AddTransient<IZondaService, ZondaService>();
 //options 
 builder.Services.Configure<ZondaConnectorOptions>(builder.Configuration.GetSection(ZondaConnectorOptions.SectionName));
 //cors

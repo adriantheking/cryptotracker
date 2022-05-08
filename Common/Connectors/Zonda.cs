@@ -23,6 +23,7 @@ namespace Common.Connectors
             this.options = options?.Value;
             restClient = new RestClient(this.options.BaseUrl);
             this.logger = logger;
+
         }
         public async Task<ZondaTransactionHistoryModel?> GetTransactionsAsync()
         {
@@ -61,6 +62,30 @@ namespace Common.Connectors
                 } while (nextPageCursor != null);
 
                 return transactionHistory;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, ex?.Message, ex?.InnerException);
+                throw;
+            }
+        }
+
+
+        public async Task<ZondaOperationHistoryModel?> GetOperationsAsync()
+        {
+            PrepareHeaders(restClient);
+            ZondaOperationHistoryModel? operationHistory = null;
+            RestRequest request = new RestRequest(ZondaEndpoints.OperationHistoryEndpoint, Method.Get);
+            try
+            {
+                var response = await restClient.ExecuteAsync(request);
+
+                if (response.IsSuccessful && response.Content != null)
+                {
+                    operationHistory = JsonConvert.DeserializeObject<ZondaOperationHistoryModel>(response.Content);
+                }
+
+                return operationHistory;
             }
             catch (Exception ex)
             {
@@ -144,5 +169,6 @@ namespace Common.Connectors
             restClient.AddDefaultHeader("Request-Timestamp", DateTimeOffset.Now.ToUnixTimeSeconds().ToString());
 
         }
+
     }
 }
