@@ -1,0 +1,23 @@
+
+<div class="row">
+    <div class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Date</th>
+                <th scope="col">Market</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Rate</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let item of dashboardItems?.items; index as i">
+                <td>{{i}}</td>
+                <td>{{item['time']}}</td>
+                <td>{{item['market']}}</td>
+                <td>{{item['amount']}}</td>
+                <td>{{item['rate']}}</td>
+            </tr>
+        </tbody>
+    </div>
+</div>

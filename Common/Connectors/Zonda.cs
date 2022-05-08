@@ -24,35 +24,49 @@ namespace Common.Connectors
             restClient = new RestClient(this.options.BaseUrl);
             this.logger = logger;
         }
-        public async Task<ZondaTransactionHistoryModel> GetTransactionsAsync()
+        public async Task<ZondaTransactionHistoryModel?> GetTransactionsAsync()
         {
             PrepareHeaders(restClient);
-            string nextPageCursor = null;
-
-            do
+            string? nextPageCursor = null;
+            ZondaTransactionHistoryModel? transactionHistory = null;
+            RestRequest? request = null;
+            try
             {
-                RestRequest request = new RestRequest(ZondaEndpoints.TransactionHistoryEndpoint, Method.Get);
-                try
+                do
                 {
+                    if (nextPageCursor == null)
+                    {
+                        request = new RestRequest(ZondaEndpoints.TransactionHistoryEndpoint, Method.Get);
+                    }
+                    else
+                    {
+                        request = new RestRequest(ZondaEndpoints.TransactionHistoryEndpoint + $"?{nameof(nextPageCursor)}={nextPageCursor}");
+                    }
                     var response = await restClient.ExecuteAsync(request);
 
                     if (response.IsSuccessful && response.Content != null)
                     {
-                        var transactionHistory = JsonConvert.DeserializeObject<ZondaTransactionHistoryModel>(response.Content);
-                        return transactionHistory;
+                        if (transactionHistory == null)
+                        {
+                            transactionHistory = JsonConvert.DeserializeObject<ZondaTransactionHistoryModel>(response.Content);
+                            nextPageCursor = transactionHistory.NextPageCursor;
+                        }
+                        else
+                        {
+                            var transactions = JsonConvert.DeserializeObject<ZondaTransactionHistoryModel>(response.Content);
+                            transactionHistory.Items.AddRange(transactions.Items);
+                            nextPageCursor = transactionHistory.NextPageCursor;
+                        }
                     }
+                } while (nextPageCursor != null);
 
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, ex?.Message, ex?.InnerException);
-                    throw;
-                }
-
-                return new ZondaTransactionHistoryModel();
-
-            } while (nextPageCursor != null);
-
+                return transactionHistory;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, ex?.Message, ex?.InnerException);
+                throw;
+            }
         }
 
         public RestClientOptions? SetRestOptions() => new RestClientOptions()
@@ -100,8 +114,30 @@ namespace Common.Connectors
 
         private void PrepareHeaders(RestClient restClient)
         {
-            restClient.AddDefaultHeader("Accept", "application/json");
-            restClient.AddDefaultHeader("Content-Type", "application/json");
+            if (!restClient.DefaultParameters.Any(x => x.Name == "Accept"))
+            {
+                restClient.AddDefaultHeader("Accept", "application/json");
+            }
+            if (!restClient.DefaultParameters.Any(x => x.Name == "Content-Type"))
+            {
+                restClient.AddDefaultHeader("Content-Type", "application/json");
+            }
+            if (restClient.DefaultParameters.Any(x => x.Name == "API-Key"))
+            {
+                restClient.DefaultParameters.RemoveParameter("API-Key");
+            }
+            if (restClient.DefaultParameters.Any(x => x.Name == "API-Hash"))
+            {
+                restClient.DefaultParameters.RemoveParameter("API-Hash");
+            }
+            if (restClient.DefaultParameters.Any(x => x.Name == "operation-id"))
+            {
+                restClient.DefaultParameters.RemoveParameter("operation-id");
+            }
+            if (restClient.DefaultParameters.Any(x => x.Name == "Request-Timestamp"))
+            {
+                restClient.DefaultParameters.RemoveParameter("Request-Timestamp");
+            }
             restClient.AddDefaultHeader("API-Key", options.PublicKey);
             restClient.AddDefaultHeader("API-Hash", GetHMAC(options.PublicKey, options.PrivateKey));
             restClient.AddDefaultHeader("operation-id", Guid.NewGuid().ToString());

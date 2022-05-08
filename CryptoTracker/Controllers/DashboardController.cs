@@ -20,9 +20,9 @@ namespace CryptoTracker.Controllers
         [HttpGet]
         public async Task<IActionResult> GetDashboard()
         {
-            await this.transactionService.GetZondaTransactions();
+            var zondaTransactions = await this.transactionService.GetZondaTransactions();
 
-            return Ok();
+            return Ok(zondaTransactions);
         }
     }
 }

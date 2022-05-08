@@ -15,7 +15,21 @@ builder.Services.AddSingleton<IZonda, Zonda>();
 builder.Services.AddTransient<ITransactionService, TransactionService>();
 //options 
 builder.Services.Configure<ZondaConnectorOptions>(builder.Configuration.GetSection(ZondaConnectorOptions.SectionName));
+//cors
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("default", policy => {
+        policy.AllowAnyMethod();
+        policy.AllowAnyOrigin();
+        policy.AllowAnyHeader(); 
+    });
+});
+builder.Services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_3_0);
 var app = builder.Build();
+
+
+//cors
+app.UseCors("default");
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

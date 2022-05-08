@@ -9,7 +9,7 @@ namespace Common.Connectors.Interfaces
         /// Method returns transactions related to account
         /// </summary>
         /// <returns></returns>
-        public Task<ZondaTransactionHistoryModel> GetTransactionsAsync();
+        public Task<ZondaTransactionHistoryModel?> GetTransactionsAsync();
         public RestClientOptions? SetRestOptions();
     }
 }
