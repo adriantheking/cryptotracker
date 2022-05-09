@@ -1,5 +1,4 @@
-﻿using Common.Connectors.Interfaces;
-using Common.Services.Interfaces;
+﻿using Common.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CryptoTracker.Controllers
