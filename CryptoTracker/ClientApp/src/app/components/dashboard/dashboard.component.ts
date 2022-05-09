@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { DashboardService, ZondaTransactionHistoryModel } from "src/app/services/dashboard.service";
+import { ZondaService } from "src/app/services/zonda.service";
 
 @Component({
     selector: 'dashboard',
@@ -7,17 +8,24 @@ import { DashboardService, ZondaTransactionHistoryModel } from "src/app/services
   })
   export class DashboardComponent implements OnInit {
     public dashboardItems?: ZondaTransactionHistoryModel;
+    public zondaInvestedAmount: number = 0;
 
-    constructor(private dashboardService: DashboardService){
+    constructor(private dashboardService: DashboardService,
+      private zondaService: ZondaService){
 
     }
 
     ngOnInit(): void {
-        this.GetDashboard();
+        this.getDashboard();
+        this.getZondaInvestedAmount();
     }
 
 
-    public GetDashboard(){
+    public getDashboard(){
         this.dashboardService.GetDashboard().subscribe(x => this.dashboardItems = x);
+    }
+
+    public getZondaInvestedAmount(){
+      this.zondaService.GetInvestedAmount().subscribe(x => this.zondaInvestedAmount = x);
     }
   }

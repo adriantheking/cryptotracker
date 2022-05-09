@@ -17,7 +17,7 @@ namespace Common.Connectors
         private readonly RestClient restClient;
         private readonly ZondaConnectorOptions options;
         private readonly ILogger<Zonda> logger;
-
+        private Object obj = new object();
         public Zonda(ILogger<Zonda> logger, IOptions<ZondaConnectorOptions> options)
         {
             this.options = options?.Value;
@@ -27,7 +27,10 @@ namespace Common.Connectors
         }
         public async Task<ZondaTransactionHistoryModel?> GetTransactionsAsync()
         {
-            PrepareHeaders(restClient);
+            lock (obj)
+            {
+                PrepareHeaders(restClient);
+            }
             string? nextPageCursor = null;
             ZondaTransactionHistoryModel? transactionHistory = null;
             RestRequest? request = null;
@@ -71,11 +74,28 @@ namespace Common.Connectors
         }
 
 
-        public async Task<ZondaOperationHistoryModel?> GetOperationsAsync()
+        public async Task<ZondaOperationHistoryModel?> GetOperationsAsync(string[]? types = null, string sort = "DESC")
         {
-            PrepareHeaders(restClient);
+            lock (obj)
+            {
+                PrepareHeaders(restClient);
+            }
             ZondaOperationHistoryModel? operationHistory = null;
-            RestRequest request = new RestRequest(ZondaEndpoints.OperationHistoryEndpoint, Method.Get);
+            RestRequest request = null;
+            string parameters = "?";
+
+            if(types != null)
+            {
+                parameters += $"types={JsonConvert.SerializeObject(types)}";
+            }
+            if (parameters == "?")
+            {
+                request = new RestRequest(ZondaEndpoints.OperationHistoryEndpoint, Method.Get);
+            }
+            else
+            {
+                request = new RestRequest(ZondaEndpoints.OperationHistoryEndpoint + parameters, Method.Get);
+            }
             try
             {
                 var response = await restClient.ExecuteAsync(request);

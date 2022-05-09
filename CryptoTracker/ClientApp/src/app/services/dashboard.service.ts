@@ -14,6 +14,7 @@ export class DashboardService{
     public GetDashboard(): Observable<ZondaTransactionHistoryModel>{
         return this.httpClient.get(this.API_URL+'/Dashboard') as Observable<ZondaTransactionHistoryModel>;
     }
+
 }
 
 export interface ZondaTransactionHistoryModel{

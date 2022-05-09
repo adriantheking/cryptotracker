@@ -9,6 +9,7 @@ namespace Common.Services.Interfaces
         /// </summary>
         /// <returns></returns>
         Task<ZondaTransactionHistoryModel> GetTransactionsAsync();
-        Task<ZondaOperationHistoryModel> GetOperationsAsync();
+        Task<ZondaOperationHistoryModel> GetOperationsAsync(string[]? types = null);
+        Task<decimal> GetInvestedAmountAsync();
     }
 }

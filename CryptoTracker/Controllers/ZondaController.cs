@@ -1,4 +1,5 @@
 ﻿using Common.Connectors.Interfaces;
+using Common.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CryptoTracker.Controllers
@@ -7,18 +8,26 @@ namespace CryptoTracker.Controllers
     [Route("[controller]")]
     public class ZondaController : ControllerBase
     {
-        private readonly IZonda zonda;
+        private readonly IZondaService zondaService;
 
-        public ZondaController(IZonda zonda)
+        public ZondaController(IZondaService zondaService)
         {
-            this.zonda = zonda;
+            this.zondaService = zondaService;
         }
-        [HttpGet]
-        public async Task<IActionResult> TestZonda()
-        {
-            var a = await zonda.GetTransactionsAsync();
 
-            return Ok(a);
+        [HttpGet(nameof(GetZondaOperations))]
+        public async Task<IActionResult> GetZondaOperations()
+        {
+            var zondaOperations = await this.zondaService.GetOperationsAsync();
+
+            return Ok(zondaOperations);
+        }
+
+        [HttpGet(nameof(GetInvestedAmount))]
+        public async Task<IActionResult> GetInvestedAmount()
+        {
+            var investedAmount = await this.zondaService.GetInvestedAmountAsync();
+            return Ok(investedAmount);
         }
     }
 }

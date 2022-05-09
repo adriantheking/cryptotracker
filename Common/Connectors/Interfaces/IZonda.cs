@@ -15,7 +15,13 @@ namespace Common.Connectors.Interfaces
         /// </summary>
         /// <returns></returns>
         public Task<ZondaTransactionHistoryModel?> GetTransactionsAsync();
-        public Task<ZondaOperationHistoryModel?> GetOperationsAsync();
+        /// <summary>
+        /// Returns list of operations related with account
+        /// </summary>
+        /// <param name="types">type of operation ref:https://docs.zonda.exchange/reference/historia-operacji</param>
+        /// <param name="sort">desc or asc</param>
+        /// <returns></returns>
+        public Task<ZondaOperationHistoryModel?> GetOperationsAsync(string[]? types = null, string sort = "DESC");
         public RestClientOptions? SetRestOptions();
     }
 }
