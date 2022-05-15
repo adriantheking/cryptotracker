@@ -15,6 +15,8 @@ builder.Services.AddSingleton<IZonda, Zonda>();
 builder.Services.AddTransient<IZondaService, ZondaService>();
 //options 
 builder.Services.Configure<ZondaConnectorOptions>(builder.Configuration.GetSection(ZondaConnectorOptions.SectionName));
+//other
+builder.Services.AddLazyCache();
 //cors
 builder.Services.AddCors(options =>
 {

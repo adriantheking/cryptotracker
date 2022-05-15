@@ -1,5 +1,6 @@
 ﻿using Common.Connectors.Interfaces;
 using Common.Services.Interfaces;
+using LazyCache;
 using Microsoft.Extensions.Logging;
 using Models.Connectors.Zonda;
 
@@ -8,13 +9,17 @@ namespace Common.Services
     public class ZondaService : IZondaService
     {
         private readonly ILogger<ZondaService> logger;
+        private readonly IAppCache cache;
         private readonly IZonda zondaConnector;
         private static readonly string ADD_FUNDS_PROP = "ADD_FUNDS";
         private static readonly string SUBTRACT_FUNDS_PROP = "SUBTRACT_FUNDS";
+        private static readonly string OPERATIONS_CACHE_KEY = "OPERATIONS_";
+        private static readonly string TRANSACTIONS_CACHE_KEY = "TRANSACTIONS_";
 
-        public ZondaService(ILogger<ZondaService> logger, IZonda zondaConnector)
+        public ZondaService(ILogger<ZondaService> logger, IAppCache cache, IZonda zondaConnector)
         {
             this.logger = logger;
+            this.cache = cache;
             this.zondaConnector = zondaConnector;
         }
 
@@ -43,12 +48,21 @@ namespace Common.Services
 
         public async Task<ZondaOperationHistoryModel> GetOperationsAsync(string[]? types = null)
         {
-            return await this.zondaConnector.GetOperationsAsync(types: types);
+            string cacheKey = OPERATIONS_CACHE_KEY;
+            if (types != null)
+                cacheKey += string.Join("_", types);
+
+            return await cache.GetOrAddAsync(cacheKey, async () =>
+            {
+                return await this.zondaConnector.GetOperationsAsync(types: types);
+            });
         }
 
         public async Task<ZondaTransactionHistoryModel> GetTransactionsAsync()
         {
-            return await this.zondaConnector.GetTransactionsAsync();
+            return await cache.GetOrAddAsync(TRANSACTIONS_CACHE_KEY, async () => {
+                return await this.zondaConnector.GetTransactionsAsync();
+            });
         }
     }
 }

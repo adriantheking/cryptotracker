@@ -27,24 +27,19 @@ namespace Common.Connectors
         }
         public async Task<ZondaTransactionHistoryModel?> GetTransactionsAsync()
         {
-            lock (obj)
-            {
-                PrepareHeaders(restClient);
-            }
-            string? nextPageCursor = null;
+            string? nextPageCursor = "start";
             ZondaTransactionHistoryModel? transactionHistory = null;
             RestRequest? request = null;
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            parameters.Add(nameof(nextPageCursor), nextPageCursor);
             try
             {
                 do
                 {
-                    if (nextPageCursor == null)
+                    request = new RestRequest(ZondaEndpoints.TransactionHistoryEndpoint + $"?query={JsonConvert.SerializeObject(parameters)}");
+                    lock (obj)
                     {
-                        request = new RestRequest(ZondaEndpoints.TransactionHistoryEndpoint, Method.Get);
-                    }
-                    else
-                    {
-                        request = new RestRequest(ZondaEndpoints.TransactionHistoryEndpoint + $"?{nameof(nextPageCursor)}={nextPageCursor}");
+                        PrepareHeaders(request);
                     }
                     var response = await restClient.ExecuteAsync(request);
 
@@ -54,12 +49,23 @@ namespace Common.Connectors
                         {
                             transactionHistory = JsonConvert.DeserializeObject<ZondaTransactionHistoryModel>(response.Content);
                             nextPageCursor = transactionHistory.NextPageCursor;
+                            parameters[nameof(nextPageCursor)] = nextPageCursor;
                         }
                         else
                         {
                             var transactions = JsonConvert.DeserializeObject<ZondaTransactionHistoryModel>(response.Content);
-                            transactionHistory.Items.AddRange(transactions.Items);
-                            nextPageCursor = transactionHistory.NextPageCursor;
+                            if (transactions != null && transactions.Items != null && transactions.Items.Any())
+                            {
+                                transactionHistory.Items.AddRange(transactions.Items);
+
+                                nextPageCursor = transactions.NextPageCursor;
+                                parameters[nameof(nextPageCursor)] = nextPageCursor;
+                            }
+                            else
+                            {
+                                nextPageCursor = null;
+                                parameters[nameof(nextPageCursor)] = null;
+                            }
                         }
                     }
                 } while (nextPageCursor != null);
@@ -76,42 +82,73 @@ namespace Common.Connectors
 
         public async Task<ZondaOperationHistoryModel?> GetOperationsAsync(string[]? types = null, string sort = "DESC")
         {
-            lock (obj)
-            {
-                PrepareHeaders(restClient);
-            }
             ZondaOperationHistoryModel? operationHistory = null;
             RestRequest request = null;
-            string parameters = "?";
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            int offset = 0;
+            parameters.Add(nameof(offset), 0);
+            if (types != null)
+            {
+                parameters.Add("types", types);
+            }
 
-            if(types != null)
+            do
             {
-                parameters += $"types={JsonConvert.SerializeObject(types)}";
-            }
-            if (parameters == "?")
-            {
-                request = new RestRequest(ZondaEndpoints.OperationHistoryEndpoint, Method.Get);
-            }
-            else
-            {
-                request = new RestRequest(ZondaEndpoints.OperationHistoryEndpoint + parameters, Method.Get);
-            }
-            try
-            {
-                var response = await restClient.ExecuteAsync(request);
-
-                if (response.IsSuccessful && response.Content != null)
+                if (!parameters.Any())
                 {
-                    operationHistory = JsonConvert.DeserializeObject<ZondaOperationHistoryModel>(response.Content);
+                    request = new RestRequest(ZondaEndpoints.OperationHistoryEndpoint, Method.Get);
+                    lock (obj) { PrepareHeaders(request); }
+                }
+                else
+                {
+                    request = new RestRequest(ZondaEndpoints.OperationHistoryEndpoint + $"?query={JsonConvert.SerializeObject(parameters)}", Method.Get);
+                    lock (obj) { PrepareHeaders(request); }
                 }
 
-                return operationHistory;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, ex?.Message, ex?.InnerException);
-                throw;
-            }
+                try
+                {
+                    var response = await restClient.ExecuteAsync(request);
+                    if (response.IsSuccessful && response.Content != null)
+                    {
+                        if (operationHistory == null)
+                        {
+                            operationHistory = JsonConvert.DeserializeObject<ZondaOperationHistoryModel>(response.Content);
+                            if (operationHistory != null && operationHistory.HasNextPage.HasValue && operationHistory.HasNextPage.Value)
+                            {
+                                parameters[nameof(offset)] = (int)parameters[nameof(offset)] + 10;
+                                offset += 10;
+                            }
+                        }
+                        else
+                        {
+                            var operations = JsonConvert.DeserializeObject<ZondaOperationHistoryModel>(response.Content);
+                            if (operations != null && operations.Items != null && operations.Items.Any())
+                                operationHistory.Items.AddRange(operations.Items);
+
+                            if (operations != null && operations.HasNextPage.HasValue && operations.HasNextPage.Value)
+                            {
+                                parameters[nameof(offset)] = (int)parameters[nameof(offset)] + 10;
+                                offset += 10;
+                            }
+                            else
+                            {
+                                parameters[nameof(offset)] = 0;
+                                offset = 0;
+                            }
+                        }
+                    }
+
+
+
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, ex?.Message, ex?.InnerException);
+                    throw;
+                }
+            } while (offset != 0);
+
+            return operationHistory;
         }
 
         public RestClientOptions? SetRestOptions() => new RestClientOptions()
@@ -157,37 +194,19 @@ namespace Common.Connectors
             return output.ToString();
         }
 
-        private void PrepareHeaders(RestClient restClient)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="restRequest"></param>
+        /// <param name="parameters">json formatted parameters</param>
+        private void PrepareHeaders(RestRequest restRequest, string? parameters = null)
         {
-            if (!restClient.DefaultParameters.Any(x => x.Name == "Accept"))
-            {
-                restClient.AddDefaultHeader("Accept", "application/json");
-            }
-            if (!restClient.DefaultParameters.Any(x => x.Name == "Content-Type"))
-            {
-                restClient.AddDefaultHeader("Content-Type", "application/json");
-            }
-            if (restClient.DefaultParameters.Any(x => x.Name == "API-Key"))
-            {
-                restClient.DefaultParameters.RemoveParameter("API-Key");
-            }
-            if (restClient.DefaultParameters.Any(x => x.Name == "API-Hash"))
-            {
-                restClient.DefaultParameters.RemoveParameter("API-Hash");
-            }
-            if (restClient.DefaultParameters.Any(x => x.Name == "operation-id"))
-            {
-                restClient.DefaultParameters.RemoveParameter("operation-id");
-            }
-            if (restClient.DefaultParameters.Any(x => x.Name == "Request-Timestamp"))
-            {
-                restClient.DefaultParameters.RemoveParameter("Request-Timestamp");
-            }
-            restClient.AddDefaultHeader("API-Key", options.PublicKey);
-            restClient.AddDefaultHeader("API-Hash", GetHMAC(options.PublicKey, options.PrivateKey));
-            restClient.AddDefaultHeader("operation-id", Guid.NewGuid().ToString());
-            restClient.AddDefaultHeader("Request-Timestamp", DateTimeOffset.Now.ToUnixTimeSeconds().ToString());
-
+            restRequest.AddHeader("Accept", "application/json");
+            restRequest.AddHeader("Content-Type", "application/json");
+            restRequest.AddHeader("API-Key", options.PublicKey);
+            restRequest.AddHeader("API-Hash", GetHMAC(options.PublicKey, options.PrivateKey, parameters: parameters));
+            restRequest.AddHeader("operation-id", Guid.NewGuid().ToString());
+            restRequest.AddHeader("Request-Timestamp", DateTimeOffset.Now.ToUnixTimeSeconds().ToString());
         }
 
     }
