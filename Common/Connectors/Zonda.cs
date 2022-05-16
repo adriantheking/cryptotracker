@@ -156,12 +156,28 @@ namespace Common.Connectors
             return operationHistory;
         }
 
-        public RestClientOptions? SetRestOptions() => new RestClientOptions()
+        public async Task<ZondaBalancesModel?> GetWalletsAsync()
         {
-            BaseHost = options.BaseUrl,
-            Timeout = options.TimeOut.Value
-        };
+            RestRequest request = new RestRequest(ZondaEndpoints.WalletsList);
+            lock (obj) { PrepareHeaders(request); }
 
+            try
+            {
+                var response = await restClient.ExecuteAsync(request);
+                if(response.IsSuccessful && response.Content != null)
+                {
+                    var wallets = JsonConvert.DeserializeObject<ZondaBalancesModel>(response.Content);
+                    return wallets;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, ex?.Message, ex?.InnerException);
+                throw;
+            }
+
+            return null;
+        }
 
         public void Dispose()
         {

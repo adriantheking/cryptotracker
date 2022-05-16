@@ -20,6 +20,7 @@ namespace Common.Services
         private static readonly string TRANSACTION_COMMISSION_OUTCOME = "TRANSACTION_COMMISSION_OUTCOME";
         private static readonly string OPERATIONS_CACHE_KEY = "OPERATIONS_";
         private static readonly string TRANSACTIONS_CACHE_KEY = "TRANSACTIONS_";
+        private static readonly string WALLETS_CACHE_KEY = "WALLETS_";
 
         public ZondaService(ILogger<ZondaService> logger, IAppCache cache, IZonda zondaConnector)
         {
@@ -91,6 +92,14 @@ namespace Common.Services
             });
 
             return balances;
+        }
+
+        public async Task<List<ZondaBalancesWalletsModel>?> GetWallets()
+        {
+            return await cache.GetOrAddAsync(WALLETS_CACHE_KEY, async () =>
+            {
+                return (await zondaConnector.GetWalletsAsync()).Balances.Where(x => x.Type == "CRYPTO" && x.TotalFunds > 0).ToList();
+            });
         }
     }
 }

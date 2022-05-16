@@ -7,6 +7,24 @@
         Invested PLN: {{zondaInvestedAmount}}
     </div>
 </div>
+<div class="row">Zonda coins:
+    <div class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Currency</th>
+                <th scope="col">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let item of zondaWallets; index as i">
+                <td>{{i}}</td>
+                <td>{{item['currency']}}</td>
+                <td>{{item['totalFunds']}}</td>
+            </tr>
+        </tbody>
+    </div>
+</div>
 <div class="row">
     <div class="table">
         <thead>

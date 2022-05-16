@@ -34,5 +34,11 @@ namespace CryptoTracker.Controllers
         {
             return Ok(await this.zondaService.GetCryptoBalancesAsync());
         }
+
+        [HttpGet(nameof(GetWallets))]
+        public async Task<IActionResult> GetWallets()
+        {
+            return Ok(await this.zondaService.GetWallets());
+        }
     }
 }
