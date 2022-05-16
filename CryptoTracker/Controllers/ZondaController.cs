@@ -28,5 +28,11 @@ namespace CryptoTracker.Controllers
             var investedAmount = await this.zondaService.GetInvestedAmountAsync();
             return Ok(investedAmount);
         }
+
+        [HttpGet(nameof(GetCryptoBalance))]
+        public async Task<IActionResult> GetCryptoBalance()
+        {
+            return Ok(await this.zondaService.GetCryptoBalancesAsync());
+        }
     }
 }

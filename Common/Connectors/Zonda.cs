@@ -79,7 +79,12 @@ namespace Common.Connectors
             }
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="types"></param>
+        /// <param name="sort">TODO: SORT property is NOT implemented</param>
+        /// <returns></returns>
         public async Task<ZondaOperationHistoryModel?> GetOperationsAsync(string[]? types = null, string sort = "DESC")
         {
             ZondaOperationHistoryModel? operationHistory = null;

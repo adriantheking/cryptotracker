@@ -11,5 +11,6 @@ namespace Common.Services.Interfaces
         Task<ZondaTransactionHistoryModel> GetTransactionsAsync();
         Task<ZondaOperationHistoryModel> GetOperationsAsync(string[]? types = null);
         Task<decimal> GetInvestedAmountAsync();
+        Task<List<ZondaCryptoBalanceModel>> GetCryptoBalancesAsync();
     }
 }
