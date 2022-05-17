@@ -8,22 +8,43 @@
     </div>
 </div>
 <div class="row">
-    <div class="col"><strong>Zonda coins:</strong></div>
+    <div class="col"><strong>Zonda total invested:</strong></div>
 </div>
 <div class="row">
     <div class="table">
         <thead>
             <tr>
                 <th scope="col">#</th>
-                <th scope="col">Currency</th>
+                <th scope="col">Name</th>
+                <th scope="col">Invested (PLN)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let item of zondaCryptoBalances; index as i">
+                <td>{{i}}</td>
+                <td>{{item['name']}}</td>
+                <td>{{item['invested']}}</td>
+            </tr>
+        </tbody>
+    </div>
+</div>
+<div class="row">
+    <div class="col"><strong>Zonda current investition (basing on available coins on exchange):</strong></div>
+</div>
+<div class="row">
+    <div class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
                 <th scope="col">Amount</th>
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let item of zondaWallets; index as i">
+            <tr *ngFor="let item of zondaCryptoBalances; index as i">
                 <td>{{i}}</td>
-                <td>{{item['currency']}}</td>
-                <td>{{item['totalFunds']}}</td>
+                <td>{{item['name']}}</td>
+                <td>{{item['amount']}}</td>
             </tr>
         </tbody>
     </div>

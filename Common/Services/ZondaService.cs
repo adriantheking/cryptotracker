@@ -1,6 +1,7 @@
 ﻿using Common.Connectors.Interfaces;
 using Common.Services.Interfaces;
 using Common.Utilities;
+using Common.Utilities.Zonda;
 using LazyCache;
 using Microsoft.Extensions.Logging;
 using Models.Connectors.Zonda;
@@ -75,21 +76,37 @@ namespace Common.Services
         {
             var balances = new List<ZondaCryptoBalanceModel>();
             var operations = await GetOperationsAsync(balanceCurrencies: currencies);
+            var transactions = await GetTransactionsAsync();
             foreach(var currency in currencies)
             {
+                ZondaCryptoBalanceModel balanceModel = new ZondaCryptoBalanceModel();
+                var currencyTransactions = transactions?.Items.Where(x => x.Market.ToLower().Contains(currency.ToLower()));
                 var currencyOperations = operations?.Items?.Where(x => x.Balance.Currency.ToLower() == currency.ToLower()).ToList();
                 if (currencyOperations != null && currencyOperations.Any())
                 {
-                    ZondaCryptoBalanceModel balanceModel = new ZondaCryptoBalanceModel();
                     balanceModel.Name = currency;
                     balanceModel.Amount = currencyOperations.Sum(x => x.Value);
-                    balances.Add(balanceModel);
                 }
+                if(currencyTransactions != null && currencyTransactions.Any())
+                {
+                    var invested = currencyTransactions
+                        .Where(x => ZondaSupportedMarkets.FiatMarkets.Any(y => y.ToLower().Contains(x.Market.Split("-")[1].ToLower())))
+                        .Sum(x =>
+                        {
+                            return Convert.ToDecimal(x.Amount) * Convert.ToDecimal(x.Rate);
+                        });
+                    balanceModel.Invested = invested;
+                }
+                balances.Add(balanceModel);
             }
             
             return balances;
         }
 
+        /// <summary>
+        /// Returns list of available wallets with totalFunds > 0.000001
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<ZondaBalancesWalletsModel>?> GetWallets()
         {
             return await cache.GetOrAddAsync(WALLETS_CACHE_KEY, async () =>

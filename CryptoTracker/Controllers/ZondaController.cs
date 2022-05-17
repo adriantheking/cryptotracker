@@ -33,7 +33,9 @@ namespace CryptoTracker.Controllers
         [HttpGet(nameof(GetCryptoBalance))]
         public async Task<IActionResult> GetCryptoBalance()
         {
-            return Ok(await this.zondaService.GetCryptoBalancesAsync(new string[] {"BTC", "ETH"}));
+            //TODO: REMOVE IT
+            var wallets = await this.zondaService.GetWallets();
+            return Ok(await this.zondaService.GetCryptoBalancesAsync(wallets.Select(x => x.Currency).ToArray()));
         }
 
         [HttpGet(nameof(GetWallets))]
