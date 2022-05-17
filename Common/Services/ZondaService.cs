@@ -14,6 +14,7 @@ namespace Common.Services
         private readonly IZonda zondaConnector;
         private static readonly string ADD_FUNDS_PROP = "ADD_FUNDS";
         private static readonly string SUBTRACT_FUNDS_PROP = "SUBTRACT_FUNDS";
+        private static readonly string WITHDRAWAL_SUBTRACT_FUNDS_PROP = "WITHDRAWAL_SUBTRACT_FUNDS";
         private static readonly string TRANSACTION_POST_INCOME = "TRANSACTION_POST_INCOME";
         private static readonly string TRANSACTION_POST_OUTCOME = "TRANSACTION_POST_OUTCOME";
         private static readonly string WITHDRAWAL_SUBTRACT_FUNDS = "WITHDRAWAL_SUBTRACT_FUNDS";
@@ -31,16 +32,14 @@ namespace Common.Services
 
         public async Task<decimal> GetInvestedAmountAsync()
         {
-            var types = new string[] { ADD_FUNDS_PROP, SUBTRACT_FUNDS_PROP };
-            var operations = await this.GetOperationsAsync(types);
+            var types = new string[] { ADD_FUNDS_PROP, SUBTRACT_FUNDS_PROP, WITHDRAWAL_SUBTRACT_FUNDS_PROP };
+            var accountTypes = new string[] { "FIAT" };
+            var operations = await this.GetOperationsAsync(types, accountType: accountTypes);
             try
             {
                 if (operations != null && operations.Items != null)
                 {
-                    var addFundsOperations = operations.Items.Where(item => item.Type != null && item.Type.ToUpper() == ADD_FUNDS_PROP.ToUpper());
-                    var subFundsOperations = operations.Items.Where(item => item.Type != null && item.Type.ToUpper() == SUBTRACT_FUNDS_PROP.ToUpper());
-
-                    return addFundsOperations.Select(x => x.Value).Sum().Value - subFundsOperations.Select(x => x.Value).Sum().Value;
+                    return operations.Items.Sum(x => x.Value).Value;
                 }
             }
             catch (Exception ex)
@@ -52,7 +51,7 @@ namespace Common.Services
             return 0;
         }
 
-        public async Task<ZondaOperationHistoryModel> GetOperationsAsync(string[]? types = null)
+        public async Task<ZondaOperationHistoryModel> GetOperationsAsync(string[]? types = null, string[]? accountType = null, string[]? balanceCurrencies = null)
         {
             string cacheKey = OPERATIONS_CACHE_KEY;
             if (types != null)
@@ -60,7 +59,7 @@ namespace Common.Services
 
             return await cache.GetOrAddAsync(cacheKey, async () =>
             {
-                return await this.zondaConnector.GetOperationsAsync(types: types);
+                return await this.zondaConnector.GetOperationsAsync(types: types, balanceCurrencies: balanceCurrencies, balanceTypes: accountType);
             });
         }
 
@@ -72,25 +71,22 @@ namespace Common.Services
             });
         }
 
-        public async Task<List<ZondaCryptoBalanceModel>> GetCryptoBalancesAsync()
+        public async Task<List<ZondaCryptoBalanceModel>> GetCryptoBalancesAsync(string[]? currencies)
         {
             var balances = new List<ZondaCryptoBalanceModel>();
-            var transactions = await GetTransactionsAsync();
-            var operations = await GetOperationsAsync(new string[] { TRANSACTION_POST_INCOME, TRANSACTION_POST_OUTCOME, WITHDRAWAL_SUBTRACT_FUNDS, TRANSACTION_COMMISSION_OUTCOME });
-            var incomes = operations.Items.Where(x => x.Type == TRANSACTION_POST_INCOME && (x.Balance.Currency.Equals(CryptocurrenciesAbbr.BTC) || x.Balance.Currency.Equals(CryptocurrenciesAbbr.ETH))); //TODO: HARDCODED FOR BTC AND ETH
-            var trans = transactions.Items.Where(x => (x.UserAction == "Buy" || x.UserAction == "Sell"));
-
-            balances.Add(new ZondaCryptoBalanceModel()
+            var operations = await GetOperationsAsync(balanceCurrencies: currencies);
+            foreach(var currency in currencies)
             {
-                Name = CryptocurrenciesAbbr.BTC,
-                Amount = trans.Where(x => x.UserAction == "Buy" && (x.Market.Equals("BTC-USDT") || x.Market.Equals("BTC-PLN"))).Select(x => Convert.ToDecimal(x.Amount)).Sum() - trans.Where(x => x.UserAction == "Sell" && (x.Market.Equals("BTC-USDT") || x.Market.Equals("BTC-PLN"))).Select(x => Convert.ToDecimal(x.Amount)).Sum()//incomes.Where(x => x.Balance.Currency.Equals(CryptocurrenciesAbbr.BTC)).Sum(x => x.Value)
-            });
-            balances.Add(new ZondaCryptoBalanceModel()
-            {
-                Name = CryptocurrenciesAbbr.ETH,
-                Amount = trans.Where(x => x.UserAction == "Buy" && (x.Market.Equals("ETH-USDT") || x.Market.Equals("ETH-PLN"))).Select(x => Convert.ToDecimal(x.Amount)).Sum() - trans.Where(x => x.UserAction == "Sell" && (x.Market.Equals("ETH-USDT") || x.Market.Equals("ETH-PLN"))).Select(x => Convert.ToDecimal(x.Amount)).Sum()
-            });
-
+                var currencyOperations = operations?.Items?.Where(x => x.Balance.Currency.ToLower() == currency.ToLower()).ToList();
+                if (currencyOperations != null && currencyOperations.Any())
+                {
+                    ZondaCryptoBalanceModel balanceModel = new ZondaCryptoBalanceModel();
+                    balanceModel.Name = currency;
+                    balanceModel.Amount = currencyOperations.Sum(x => x.Value);
+                    balances.Add(balanceModel);
+                }
+            }
+            
             return balances;
         }
 
@@ -98,7 +94,7 @@ namespace Common.Services
         {
             return await cache.GetOrAddAsync(WALLETS_CACHE_KEY, async () =>
             {
-                return (await zondaConnector.GetWalletsAsync()).Balances.Where(x => x.Type == "CRYPTO" && x.TotalFunds > 0).ToList();
+                return (await zondaConnector.GetWalletsAsync()).Balances.Where(x => x.Type == "CRYPTO" && x.TotalFunds > (decimal)0.000001).ToList();
             });
         }
     }

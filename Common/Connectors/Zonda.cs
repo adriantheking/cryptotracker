@@ -82,21 +82,32 @@ namespace Common.Connectors
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="types"></param>
+        /// <param name="types">Type of operation for example SUBSTRACT</param>
+        /// <param name="balanceCurrencies">array of currencies to filter example: ["BTC"]</param>
+        /// <param name="balanceTypes">array of type of balance. FIAT or CRYPTO</param>
         /// <param name="sort">TODO: SORT property is NOT implemented</param>
         /// <returns></returns>
-        public async Task<ZondaOperationHistoryModel?> GetOperationsAsync(string[]? types = null, string sort = "DESC")
+        public async Task<ZondaOperationHistoryModel?> GetOperationsAsync(string[]? types = null, string[]? balanceCurrencies = null, string[]? balanceTypes = null, string sort = "DESC")
         {
             ZondaOperationHistoryModel? operationHistory = null;
             RestRequest request = null;
             Dictionary<string, object> parameters = new Dictionary<string, object>();
+            Dictionary<string, string> balanceParameters = new Dictionary<string, string>();
+
             int offset = 0;
             parameters.Add(nameof(offset), 0);
             if (types != null)
             {
-                parameters.Add("types", types);
+                parameters.Add(nameof(types), types);
             }
-
+            if(balanceCurrencies != null)
+            {
+                parameters.Add(nameof(balanceCurrencies), balanceCurrencies);
+            }
+            if(balanceTypes != null)
+            {
+                parameters.Add(nameof(balanceTypes), balanceTypes);
+            }
             do
             {
                 if (!parameters.Any())
@@ -130,6 +141,10 @@ namespace Common.Connectors
                             if (operations != null && operations.Items != null && operations.Items.Any())
                                 operationHistory.Items.AddRange(operations.Items);
 
+                            operationHistory.Settings = operations.Settings;
+                            operationHistory.HasNextPage = operations.HasNextPage;
+                            operationHistory.Limit = operations.Limit;
+                            operationHistory.Offset = operations.Offset;
                             if (operations != null && operations.HasNextPage.HasValue && operations.HasNextPage.Value)
                             {
                                 parameters[nameof(offset)] = (int)parameters[nameof(offset)] + 10;

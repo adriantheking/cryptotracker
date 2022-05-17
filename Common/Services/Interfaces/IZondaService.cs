@@ -9,13 +9,13 @@ namespace Common.Services.Interfaces
         /// </summary>
         /// <returns></returns>
         Task<ZondaTransactionHistoryModel> GetTransactionsAsync();
-        Task<ZondaOperationHistoryModel> GetOperationsAsync(string[]? types = null);
+        Task<ZondaOperationHistoryModel> GetOperationsAsync(string[]? types = null, string[]? accountType = null, string[]? balanceCurrencies = null);
         Task<decimal> GetInvestedAmountAsync();
         /// <summary>
         /// Returns list of all wallets with balance
         /// </summary>
         /// <returns></returns>
         Task<List<ZondaBalancesWalletsModel?>> GetWallets();
-        Task<List<ZondaCryptoBalanceModel>> GetCryptoBalancesAsync();
+        Task<List<ZondaCryptoBalanceModel>> GetCryptoBalancesAsync(string[]? currencies);
     }
 }
