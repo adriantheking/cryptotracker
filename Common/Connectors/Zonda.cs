@@ -4,11 +4,10 @@ using Common.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Models.Connectors.Zonda;
+using Newtonsoft.Json;
 using RestSharp;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
-using Newtonsoft.Json;
 
 namespace Common.Connectors
 {
@@ -100,11 +99,11 @@ namespace Common.Connectors
             {
                 parameters.Add(nameof(types), types);
             }
-            if(balanceCurrencies != null)
+            if (balanceCurrencies != null)
             {
                 parameters.Add(nameof(balanceCurrencies), balanceCurrencies);
             }
-            if(balanceTypes != null)
+            if (balanceTypes != null)
             {
                 parameters.Add(nameof(balanceTypes), balanceTypes);
             }
@@ -126,6 +125,7 @@ namespace Common.Connectors
                     var response = await restClient.ExecuteAsync(request);
                     if (response.IsSuccessful && response.Content != null)
                     {
+                        //Checking if this is first query or not if not we dont want overrinde 
                         if (operationHistory == null)
                         {
                             operationHistory = JsonConvert.DeserializeObject<ZondaOperationHistoryModel>(response.Content);
@@ -179,7 +179,7 @@ namespace Common.Connectors
             try
             {
                 var response = await restClient.ExecuteAsync(request);
-                if(response.IsSuccessful && response.Content != null)
+                if (response.IsSuccessful && response.Content != null)
                 {
                     var wallets = JsonConvert.DeserializeObject<ZondaBalancesModel>(response.Content);
                     return wallets;
@@ -191,6 +191,28 @@ namespace Common.Connectors
                 throw;
             }
 
+            return null;
+        }
+
+        public async Task<ZondaMarketStatsModel?> GetMarketStatsAsync(string market)
+        {
+            RestRequest request = new RestRequest(ZondaEndpoints.Stats + "/" + market);
+            lock (obj) { PrepareHeaders(request); }
+
+            try
+            {
+                var response = await restClient.ExecuteAsync(request);
+                if (response.IsSuccessful && response.Content != null)
+                {
+                    var stats = JsonConvert.DeserializeObject<ZondaMarketStatsModel>(response.Content);
+                    return stats;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, ex?.Message, ex?.InnerException);
+                throw;
+            }
             return null;
         }
 
@@ -244,6 +266,7 @@ namespace Common.Connectors
             restRequest.AddHeader("operation-id", Guid.NewGuid().ToString());
             restRequest.AddHeader("Request-Timestamp", DateTimeOffset.Now.ToUnixTimeSeconds().ToString());
         }
+
 
     }
 }

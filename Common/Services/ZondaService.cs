@@ -23,6 +23,7 @@ namespace Common.Services
         private static readonly string OPERATIONS_CACHE_KEY = "OPERATIONS_";
         private static readonly string TRANSACTIONS_CACHE_KEY = "TRANSACTIONS_";
         private static readonly string WALLETS_CACHE_KEY = "WALLETS_";
+        private static readonly string MARKET_STATS_CACHE_KEY = "MARKETSTATS_";
 
         public ZondaService(ILogger<ZondaService> logger, IAppCache cache, IZonda zondaConnector)
         {
@@ -79,6 +80,9 @@ namespace Common.Services
             var transactions = await GetTransactionsAsync();
             foreach(var currency in currencies)
             {
+                var currentMarket = $"{currency}-USD"; //TODO: handle it somehow
+                string cacheKey = MARKET_STATS_CACHE_KEY+currentMarket;
+                ZondaMarketStatsModel marketStatsModel = await cache.GetOrAddAsync(cacheKey, async () => { return await zondaConnector.GetMarketStatsAsync(currentMarket); }, TimeSpan.FromHours(6));
                 ZondaCryptoBalanceModel balanceModel = new ZondaCryptoBalanceModel();
                 var currencyTransactions = transactions?.Items.Where(x => x.Market.ToLower().Contains(currency.ToLower()));
                 var currencyOperations = operations?.Items?.Where(x => x.Balance.Currency.ToLower() == currency.ToLower()).ToList();
@@ -97,6 +101,7 @@ namespace Common.Services
                         });
                     balanceModel.Invested = invested;
                 }
+                balanceModel.Worth = balanceModel.Amount * marketStatsModel.Stats.R24h;
                 balances.Add(balanceModel);
             }
             
@@ -114,5 +119,6 @@ namespace Common.Services
                 return (await zondaConnector.GetWalletsAsync()).Balances.Where(x => x.Type == "CRYPTO" && x.TotalFunds > (decimal)0.000001).ToList();
             });
         }
+
     }
 }

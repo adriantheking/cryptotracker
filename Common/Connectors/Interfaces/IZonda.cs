@@ -17,6 +17,7 @@ namespace Common.Connectors.Interfaces
         /// <param name="sort">desc or asc</param>
         /// <returns></returns>
         public Task<ZondaOperationHistoryModel?> GetOperationsAsync(string[]? types = null, string[]? balanceCurrencies = null, string[]? balanceTypes = null, string sort = "DESC");
+        public Task<ZondaMarketStatsModel?> GetMarketStatsAsync(string market);
         /// <summary>
         /// Returns list of all available wallets with ballance
         /// </summary>

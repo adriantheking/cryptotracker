@@ -12,5 +12,6 @@ namespace Models.Connectors.Zonda
         public string Name { get; set; }
         public decimal? Amount { get; set; }
         public decimal? Invested { get; set; }
+        public decimal? Worth { get; set; }
     }
 }

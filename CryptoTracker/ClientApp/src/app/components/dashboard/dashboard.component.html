@@ -38,6 +38,7 @@
                 <th scope="col">#</th>
                 <th scope="col">Name</th>
                 <th scope="col">Amount</th>
+                <th scope="col">Worth (USD)</th>
             </tr>
         </thead>
         <tbody>
@@ -45,9 +46,21 @@
                 <td>{{i}}</td>
                 <td>{{item['name']}}</td>
                 <td>{{item['amount']}}</td>
+                <td>{{item['worth']}}</td>
             </tr>
         </tbody>
     </div>
+</div>
+<div class="row">
+    <div class="col"><strong>Zonda current investition (basing on available coins on exchange) - Current weight:</strong></div>
+</div>
+<div class="row">
+    <td class="col-4">
+        <canvas baseChart
+                [data]="pieChartData"
+                [type]="pieChartType">
+        </canvas>
+    </td>
 </div>
 <div class="row">
     <div class="table">

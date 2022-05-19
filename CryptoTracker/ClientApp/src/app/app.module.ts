@@ -10,6 +10,7 @@ import { HomeComponent } from './home/home.component';
 import { CounterComponent } from './counter/counter.component';
 import { FetchDataComponent } from './fetch-data/fetch-data.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { NgChartsModule } from 'ng2-charts';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
       { path: '', component: DashboardComponent, pathMatch: 'full' },
       { path: 'counter', component: CounterComponent },
       { path: 'fetch-data', component: FetchDataComponent },
-    ])
+    ]),
+    NgChartsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
