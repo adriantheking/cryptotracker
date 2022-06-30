@@ -10,7 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddLogging();
 builder.Services.AddControllersWithViews();
 //connectors
-builder.Services.AddSingleton<IZonda, Zonda>();
+builder.Services.AddHttpClient<IZonda, Zonda>(x => x.BaseAddress = new Uri(builder.Configuration["ZondaConnectorOptions:BaseUrl"]));
+//builder.Services.AddSingleton<IZonda, Zonda>();
 //services
 builder.Services.AddTransient<IZondaService, ZondaService>();
 //options 
