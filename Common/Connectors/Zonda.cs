@@ -84,7 +84,7 @@ namespace Common.Connectors
         /// <param name="types">Type of operation for example SUBSTRACT</param>
         /// <param name="balanceCurrencies">array of currencies to filter example: ["BTC"]</param>
         /// <param name="balanceTypes">array of type of balance. FIAT or CRYPTO</param>
-        /// <param name="sort">TODO: SORT property is NOT implemented</param>
+        /// <param name="sort">TODO: NOT implemented</param>
         /// <returns></returns>
         public async Task<ZondaOperationHistoryModel?> GetOperationsAsync(string[]? types = null, string[]? balanceCurrencies = null, string[]? balanceTypes = null, string sort = "DESC")
         {
