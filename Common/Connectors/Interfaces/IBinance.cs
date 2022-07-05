@@ -1,6 +1,21 @@
-﻿namespace CryptoCommon.Connectors.Interfaces
+﻿using Binance.Spot.Models;
+using Models.Connectors.Binance;
+
+namespace CryptoCommon.Connectors.Interfaces
 {
     public interface IBinance
     {
+        /// <summary>
+        /// Returns full history of C2C transactions if no timestamps are set
+        /// !!!!!!! IMPORTANT !!!!!! difference between startTimestamp and endTimestamp can be maximum 30 days
+        /// </summary>
+        /// <param name="side">BUY or SELL. Default: BUY</param>
+        /// <param name="startTimestamp">Timestamp where api should start reading</param>
+        /// <param name="endTimestamp">Timestamp where api should end reading</param>
+        /// <param name="page">Page no</param>
+        /// <param name="rows">Rows per page</param>
+        /// <param name="recvWindow">check binance docs</param>
+        /// <returns></returns>
+        Task<BinanceC2CTradeHistory> GetC2CHistoryAsync(Side side = null, long? startTimestamp = null, long? endTimestamp = null, int? page = null, int? rows = null, long? recvWindow = null);
     }
 }

@@ -11,10 +11,14 @@ builder.Services.AddLogging();
 builder.Services.AddControllersWithViews();
 //connectors
 builder.Services.AddSingleton<IZonda, Zonda>();
+builder.Services.AddScoped<IBinance, BinanceConnector>();
 //services
 builder.Services.AddTransient<IZondaService, ZondaService>();
+//httpclients
+builder.Services.AddHttpClient<IBinance, BinanceConnector>();
 //options 
 builder.Services.Configure<ZondaConnectorOptions>(builder.Configuration.GetSection(ZondaConnectorOptions.SectionName));
+builder.Services.Configure<BinanceConnectorOptions>(builder.Configuration.GetSection(BinanceConnectorOptions.SectionName));
 //other
 builder.Services.AddLazyCache();
 //cors

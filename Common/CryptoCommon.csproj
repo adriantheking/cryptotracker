@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Binance.Spot" Version="1.6.0">
-      <Aliases>binance</Aliases>
+      <Aliases></Aliases>
     </PackageReference>
     <PackageReference Include="LazyCache" Version="2.4.0" />
     <PackageReference Include="LazyCache.AspNetCore" Version="2.4.0" />
