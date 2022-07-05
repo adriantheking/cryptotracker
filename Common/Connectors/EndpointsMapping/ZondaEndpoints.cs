@@ -1,4 +1,4 @@
-﻿namespace Common.Connectors.EndpointsMapping
+﻿namespace CryptoCommon.Connectors.EndpointsMapping
 {
     public static class ZondaEndpoints
     {

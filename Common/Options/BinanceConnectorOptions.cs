@@ -1,4 +1,4 @@
-﻿namespace Common.Options
+﻿namespace CryptoCommon.Options
 {
     public class BinanceConnectorOptions
     {

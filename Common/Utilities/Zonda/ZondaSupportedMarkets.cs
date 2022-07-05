@@ -1,4 +1,4 @@
-﻿namespace Common.Utilities.Zonda
+﻿namespace CryptoCommon.Utilities.Zonda
 {
     public static class ZondaSupportedMarkets
     {

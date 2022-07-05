@@ -1,5 +1,5 @@
-﻿using Common.Connectors.Interfaces;
-using Common.Services.Interfaces;
+﻿using CryptoCommon.Connectors.Interfaces;
+using CryptoCommon.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using Models.Services;
 using System;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Common.Services
+namespace CryptoCommon.Services
 {
     public class DashboardService :  IDashboardService
     {

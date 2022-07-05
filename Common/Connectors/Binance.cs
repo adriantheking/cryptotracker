@@ -1,12 +1,12 @@
-﻿using Common.Connectors.Interfaces;
-using Common.Options;
-using Common.Utilities.Binance;
+﻿using CryptoCommon.Connectors.Interfaces;
+using CryptoCommon.Options;
+using CryptoCommon.Utilities.Binance;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Common.Connectors
+namespace CryptoCommon.Connectors
 {
     public class Binance : IBinance
     {

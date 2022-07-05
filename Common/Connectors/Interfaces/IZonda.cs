@@ -1,7 +1,7 @@
 ﻿using Models.Connectors.Zonda;
 using RestSharp;
 
-namespace Common.Connectors.Interfaces
+namespace CryptoCommon.Connectors.Interfaces
 {
     public interface IZonda
     {

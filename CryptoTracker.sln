@@ -5,9 +5,9 @@ VisualStudioVersion = 17.1.32421.90
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoTracker", "CryptoTracker\CryptoTracker.csproj", "{0CDD0529-EE71-4993-91D2-3B24359A0C24}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{E8A739D5-6C25-4C01-A77F-F3CF1D07282B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoCommon", "Common\CryptoCommon.csproj", "{E8A739D5-6C25-4C01-A77F-F3CF1D07282B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{2A1109DF-26F3-4DD6-BF50-C42A718F1E1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "Models\Models.csproj", "{2A1109DF-26F3-4DD6-BF50-C42A718F1E1D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

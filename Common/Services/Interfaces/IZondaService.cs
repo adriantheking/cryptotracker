@@ -1,6 +1,6 @@
 ﻿using Models.Connectors.Zonda;
 
-namespace Common.Services.Interfaces
+namespace CryptoCommon.Services.Interfaces
 {
     public interface IZondaService
     {

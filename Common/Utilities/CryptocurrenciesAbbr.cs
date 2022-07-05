@@ -1,4 +1,4 @@
-﻿namespace Common.Utilities
+﻿namespace CryptoCommon.Utilities
 {
     public class CryptocurrenciesAbbr
     {

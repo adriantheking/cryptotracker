@@ -1,4 +1,4 @@
-﻿using Common.Services.Interfaces;
+﻿using CryptoCommon.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Models.CryptoTracker.Zonda;
 

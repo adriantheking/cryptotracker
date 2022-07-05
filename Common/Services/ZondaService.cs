@@ -1,12 +1,12 @@
-﻿using Common.Connectors.Interfaces;
-using Common.Services.Interfaces;
-using Common.Utilities;
-using Common.Utilities.Zonda;
+﻿using CryptoCommon.Connectors.Interfaces;
+using CryptoCommon.Services.Interfaces;
+using CryptoCommon.Utilities;
+using CryptoCommon.Utilities.Zonda;
 using LazyCache;
 using Microsoft.Extensions.Logging;
 using Models.Connectors.Zonda;
 
-namespace Common.Services
+namespace CryptoCommon.Services
 {
     public class ZondaService : IZondaService
     {

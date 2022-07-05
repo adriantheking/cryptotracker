@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Common.Services.Interfaces
+namespace CryptoCommon.Services.Interfaces
 {
     public interface IDashboardService
     {

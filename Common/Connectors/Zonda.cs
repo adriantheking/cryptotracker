@@ -1,6 +1,6 @@
-﻿using Common.Connectors.EndpointsMapping;
-using Common.Connectors.Interfaces;
-using Common.Options;
+﻿using CryptoCommon.Connectors.EndpointsMapping;
+using CryptoCommon.Connectors.Interfaces;
+using CryptoCommon.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Models.Connectors.Zonda;
@@ -9,7 +9,7 @@ using RestSharp;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Common.Connectors
+namespace CryptoCommon.Connectors
 {
     public class Zonda : IZonda, IDisposable
     {

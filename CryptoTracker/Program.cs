@@ -1,8 +1,8 @@
-using Common.Connectors;
-using Common.Connectors.Interfaces;
-using Common.Options;
-using Common.Services;
-using Common.Services.Interfaces;
+using CryptoCommon.Connectors;
+using CryptoCommon.Connectors.Interfaces;
+using CryptoCommon.Options;
+using CryptoCommon.Services;
+using CryptoCommon.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace Common.Utilities.Binance
+namespace CryptoCommon.Utilities.Binance
 {
     public static class BinanceQueryBuilder
     {
