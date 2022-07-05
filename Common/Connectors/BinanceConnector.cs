@@ -6,11 +6,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Models.Connectors.Binance;
 using Newtonsoft.Json;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace CryptoCommon.Connectors
 {
+    //for docs check interface
+    //There was problem with Binance name... Binance.Spot dll has the same name
     public class BinanceConnector : IBinance
     {
         private readonly ILogger<BinanceConnector> logger;
@@ -52,23 +52,6 @@ namespace CryptoCommon.Connectors
                 logger.LogError(ex?.Message, ex, ex?.InnerException);
                 throw;
             }
-        }
-
-        private string GetHMAC(string privateKey, string totalParams)
-        {
-            var privateKeyBytes = Encoding.ASCII.GetBytes(privateKey);
-            var totalParamsBytes = Encoding.ASCII.GetBytes(totalParams);
-            byte[] hash;
-
-            HMACSHA256 hmac = new HMACSHA256(privateKeyBytes);
-            lock (_sync)
-            {
-                hash = hmac.ComputeHash(totalParamsBytes);
-            }
-            var output = new StringBuilder();
-            foreach (var h in hash)
-                output.Append(h.ToString("x2"));
-            return output.ToString();
         }
     }
 }

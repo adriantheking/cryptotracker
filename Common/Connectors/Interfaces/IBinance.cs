@@ -16,6 +16,6 @@ namespace CryptoCommon.Connectors.Interfaces
         /// <param name="rows">Rows per page</param>
         /// <param name="recvWindow">check binance docs</param>
         /// <returns></returns>
-        Task<BinanceC2CTradeHistory> GetC2CHistoryAsync(Side side = null, long? startTimestamp = null, long? endTimestamp = null, int? page = null, int? rows = null, long? recvWindow = null);
+        Task<BinanceC2CTradeHistory> GetC2CHistoryAsync(Side side, long? startTimestamp = null, long? endTimestamp = null, int? page = null, int? rows = null, long? recvWindow = null);
     }
 }
