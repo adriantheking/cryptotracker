@@ -10,8 +10,8 @@ namespace CryptoCommon.Connectors.Interfaces
         /// !!!!!!! IMPORTANT !!!!!! difference between startTimestamp and endTimestamp can be maximum 30 days
         /// </summary>
         /// <param name="side">BUY or SELL. Default: BUY</param>
-        /// <param name="startTimestamp">Timestamp where api should start reading</param>
-        /// <param name="endTimestamp">Timestamp where api should end reading</param>
+        /// <param name="startTimestamp">Timestamp where api should start reading. Timestamp NEED TO BE AS UNIX FORMAT ((DateTimeOffset)d).ToUnix</param>
+        /// <param name="endTimestamp">Timestamp where api should end reading. Timestamp NEED TO BE AS UNIX FORMAT</param>
         /// <param name="page">Page no</param>
         /// <param name="rows">Rows per page</param>
         /// <param name="recvWindow">check binance docs</param>
