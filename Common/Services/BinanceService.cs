@@ -4,6 +4,7 @@ using CryptoCommon.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using Models.Connectors.Binance;
 using CryptoCommon.Utilities;
+using CryptoCommon.Utilities.Binance;
 
 namespace CryptoCommon.Services
 {
@@ -31,48 +32,57 @@ namespace CryptoCommon.Services
 
             do
             {
+                BinanceC2CTradeHistory history = null;
+                try
+                {
+                    history = await binance.GetC2CHistoryAsync(side, startTimespan, endTimespan);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, ex?.Message, ex?.InnerException);
+                    throw;
+                }
                 if (binanceC2CTradeHistory == null)
                 {
-                    try
-                    {
-                        binanceC2CTradeHistory = await binance.GetC2CHistoryAsync(side, startTimespan, endTimespan);
-                        endDay = startDay;
-                        startDay = startDay.AddDays(-30);
-                        endTimespan = ((DateTimeOffset)endDay).ToUnixTimeMilliseconds();
-                        startTimespan = ((DateTimeOffset)startDay).ToUnixTimeMilliseconds();
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, ex?.Message, ex?.InnerException);
-                        throw;
-                    }
-
+                    binanceC2CTradeHistory = history;
                 }
                 else
                 {
-                    try
+                    if (history != null && history.Data != null && history.Data.Any())
                     {
-                        var history = await binance.GetC2CHistoryAsync(side, startTimespan, endTimespan);
-                        if(history != null && history.Data != null && history.Data.Any())
-                        {
-                            binanceC2CTradeHistory?.Data?.AddRange(history.Data); //append results to main object
-                            binanceC2CTradeHistory.Total += history.Total;
-                        }
-                        //increase counters
-                        endDay = startDay;
-                        startDay = startDay.AddDays(-30);
-                        endTimespan = ((DateTimeOffset)endDay).ToUnixTimeMilliseconds();
-                        startTimespan = ((DateTimeOffset)startDay).ToUnixTimeMilliseconds();
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, ex?.Message, ex?.InnerException);
-                        throw;
-                    }
+                        binanceC2CTradeHistory?.Data?.AddRange(history.Data); //append results to main object
+                        binanceC2CTradeHistory.Total += history.Total;
+                    }               
                 }
+                //increase counters
+                endDay = startDay;
+                startDay = startDay.AddDays(-30);
+                endTimespan = ((DateTimeOffset)endDay).ToUnixTimeMilliseconds();
+                startTimespan = ((DateTimeOffset)startDay).ToUnixTimeMilliseconds();
 
             } while (DateTime.Compare(startDay, stopYear) > 0);
             return binanceC2CTradeHistory ?? new BinanceC2CTradeHistory();
+        }
+
+        public async Task<Dictionary<string, decimal>> GetInvestedAmountAsync()
+        {
+            //C2C Investment
+            var totalC2CInvestment = await GetC2CTradeHistoryAsync(Side.BUY);
+            var sumOfC2CInvestment = CalculateFromC2CRecords(totalC2CInvestment);
+
+            return sumOfC2CInvestment;
+        }
+
+        private Dictionary<string, decimal> CalculateFromC2CRecords(BinanceC2CTradeHistory history)
+        {
+            Dictionary<string, decimal> result = new Dictionary<string, decimal>();
+            BinanceSupportedConsts.Fiats.ForEach(fiat =>
+            {
+                //get records for current fiat record
+                result.Add(fiat.ToUpper(), history.Data.Where(x => x.Fiat.ToUpper().Contains(fiat.ToUpper())).ToList().Sum(x => x.TotalPrice).GetValueOrDefault());
+            });
+
+            return result;
         }
     }
 }

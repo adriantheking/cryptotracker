@@ -41,10 +41,10 @@ namespace Models.Connectors.Binance
         public string FiatSymbol { get; set; }
 
         [JsonProperty("amount")]
-        public string Amount { get; set; }
+        public decimal? Amount { get; set; }
 
         [JsonProperty("totalPrice")]
-        public string TotalPrice { get; set; }
+        public decimal? TotalPrice { get; set; }
 
         [JsonProperty("unitPrice")]
         public string UnitPrice { get; set; }
