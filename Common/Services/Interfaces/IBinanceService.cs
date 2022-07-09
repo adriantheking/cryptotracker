@@ -12,7 +12,7 @@ namespace CryptoCommon.Services.Interfaces
         /// <param name="yearsToRead">Value will be substracted from current year</param>
         /// <returns></returns>
         Task<BinanceC2CTradeHistory> GetC2CTradeHistoryAsync(Side side, int yearsToRead = 2);
-
+        Task<List<BinanceTradeListResponseModel>> Get
         /// <summary>
         /// Returns total invested amount from all sources
         /// </summary>

@@ -17,5 +17,17 @@ namespace CryptoCommon.Connectors.Interfaces
         /// <param name="recvWindow">check binance docs</param>
         /// <returns></returns>
         Task<BinanceC2CTradeHistory> GetC2CHistoryAsync(Side side, long? startTimestamp = null, long? endTimestamp = null, int? page = null, int? rows = null, long? recvWindow = null);
+        /// <summary>
+        /// Returns trade list for account
+        /// </summary>
+        /// <param name="symbol">BNBUSDT etc</param>
+        /// <param name="orderId"></param>
+        /// <param name="startTime">Binance UNIX timestamp</param>
+        /// <param name="endTime">Binance UNIX timestamp</param>
+        /// <param name="fromId"></param>
+        /// <param name="limit">Rows per page</param>
+        /// <param name="recvWindow"></param>
+        /// <returns></returns>
+        Task<List<BinanceAllOrdersHistory>> GetTradeListAsyc(string symbol, long? orderId = null, long? startTime = null, long? endTime = null, long? fromId = null, int? limit = null, long? recvWindow = null);
     }
 }

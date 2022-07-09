@@ -1,3 +1,4 @@
+using Binance.Common;
 using CryptoCommon.Connectors;
 using CryptoCommon.Connectors.Interfaces;
 using CryptoCommon.Options;
@@ -14,9 +15,10 @@ builder.Services.AddSingleton<IZonda, Zonda>();
 builder.Services.AddSingleton<IBinance, BinanceConnector>();
 //services
 builder.Services.AddTransient<IZondaService, ZondaService>();
-builder.Services.AddTransient<IBinanceService, BinanceService>();
+builder.Services.AddTransient<IBinanceService, CryptoCommon.Services.BinanceService>();
 //httpclients
-builder.Services.AddHttpClient<IBinance, BinanceConnector>();
+builder.Services.AddHttpClient<IBinance, BinanceConnector>()
+    .ConfigurePrimaryHttpMessageHandler(handler => new BinanceLoggingHandler(handler.GetService<ILogger>()));
 //options 
 builder.Services.Configure<ZondaConnectorOptions>(builder.Configuration.GetSection(ZondaConnectorOptions.SectionName));
 builder.Services.Configure<BinanceConnectorOptions>(builder.Configuration.GetSection(BinanceConnectorOptions.SectionName));

@@ -53,5 +53,28 @@ namespace CryptoCommon.Connectors
                 throw;
             }
         }
+
+        public async Task<List<BinanceAllOrdersHistory>> GetTradeListAsyc(string symbol, long? orderId = null, long? startTime = null, long? endTime = null, long? fromId = null, int? limit = null, long? recvWindow = null)
+        {
+            var spotAccountTrade = new SpotAccountTrade(httpClient, options.BaseUrl, options.PublicKey, options.PrivateKey);
+
+            try
+            {
+                var result = await spotAccountTrade.AccountTradeList(symbol,
+                    orderId,
+                    startTime,
+                    endTime,
+                    fromId,
+                    limit,
+                    recvWindow);
+
+                return JsonConvert.DeserializeObject<List<BinanceAllOrdersHistory>>(result);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, ex?.Message, ex?.InnerException);
+                throw;
+            }
+        }
     }
 }
