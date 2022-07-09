@@ -17,6 +17,6 @@ namespace CryptoCommon.Services.Interfaces
         /// Returns total invested amount from all sources
         /// </summary>
         /// <returns></returns>
-        Task<Dictionary<string, decimal>> GetInvestedAmountAsync();
+        Task<List<InvestedAmountModel>> GetInvestedAmountAsync();
     }
 }

@@ -1,10 +1,9 @@
 ﻿using Binance.Spot.Models;
 using CryptoCommon.Connectors.Interfaces;
 using CryptoCommon.Services.Interfaces;
+using CryptoCommon.Utilities.Binance;
 using Microsoft.Extensions.Logging;
 using Models.Connectors.Binance;
-using CryptoCommon.Utilities;
-using CryptoCommon.Utilities.Binance;
 
 namespace CryptoCommon.Services
 {
@@ -64,25 +63,57 @@ namespace CryptoCommon.Services
             return binanceC2CTradeHistory ?? new BinanceC2CTradeHistory();
         }
 
-        public async Task<Dictionary<string, decimal>> GetInvestedAmountAsync()
+        public async Task<List<InvestedAmountModel>> GetInvestedAmountAsync()
         {
+            List<InvestedAmountModel> investedAmountModel = new List<InvestedAmountModel>();
             //C2C Investment
             var totalC2CInvestment = await GetC2CTradeHistoryAsync(Side.BUY);
             var sumOfC2CInvestment = CalculateFromC2CRecords(totalC2CInvestment);
+            AddInvestments(sumOfC2CInvestment, ref investedAmountModel);
 
-            return sumOfC2CInvestment;
+            return investedAmountModel;
         }
 
-        private Dictionary<string, decimal> CalculateFromC2CRecords(BinanceC2CTradeHistory history)
+        /// <summary>
+        /// Calculating value for each supported FIAT record from BinanceSupportedConsts.Fiats class 
+        /// </summary>
+        /// <param name="history"></param>
+        /// <returns>List of fiats with invested amount</returns>
+        private List<InvestedAmountModel> CalculateFromC2CRecords(BinanceC2CTradeHistory history)
         {
-            Dictionary<string, decimal> result = new Dictionary<string, decimal>();
+            List<InvestedAmountModel> investedAmount = new List<InvestedAmountModel>();
             BinanceSupportedConsts.Fiats.ForEach(fiat =>
             {
-                //get records for current fiat record
-                result.Add(fiat.ToUpper(), history.Data.Where(x => x.Fiat.ToUpper().Contains(fiat.ToUpper())).ToList().Sum(x => x.TotalPrice).GetValueOrDefault());
+                InvestedAmountModel record = new InvestedAmountModel();
+                record.Fiat = fiat.ToUpper();
+                record.Value = history.Data.Where(x => x.Fiat.ToUpper().Contains(fiat.ToUpper())).ToList().Sum(x => x.TotalPrice).GetValueOrDefault();//get records for current fiat record                
+
+                investedAmount.Add(record);
             });
 
-            return result;
+            return investedAmount;
+        }
+
+        /// <summary>
+        /// Adding new data to existing source
+        /// </summary>
+        /// <param name="newData"></param>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        private List<InvestedAmountModel> AddInvestments(List<InvestedAmountModel> newData, ref List<InvestedAmountModel> source) 
+        {
+            foreach(var record in newData) { 
+                if(source.Any(s => s.Fiat.ToUpper().Equals(record.Fiat.ToUpper())))
+                {
+                    source.Where(s => s.Fiat.ToUpper().Equals(record.Fiat.ToUpper())).FirstOrDefault().Value += record.Value;
+                }
+                else
+                {
+                    source.Add(record);
+                }
+            };
+
+            return source;
         }
     }
 }
