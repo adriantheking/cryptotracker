@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CryptoDatabase\CryptoDatabase.csproj" />
     <ProjectReference Include="..\Models\Models.csproj" />
   </ItemGroup>
 

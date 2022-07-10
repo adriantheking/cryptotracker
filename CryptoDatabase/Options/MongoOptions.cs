@@ -1,4 +1,4 @@
-﻿namespace CryptoCommon.Options
+﻿namespace CryptoDatabase.Options
 {
     public class MongoOptions
     {

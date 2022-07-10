@@ -9,11 +9,14 @@ namespace CryptoTracker.Controllers
     {
         private readonly ILogger<DashboardController> logger;
         private readonly IZondaService zondaService;
+        private readonly IDashboardService dashboardService;
 
-        public DashboardController(ILogger<DashboardController> logger, IZondaService zondaService)
+        public DashboardController(ILogger<DashboardController> logger, IZondaService zondaService,
+            IDashboardService dashboardService)
         {
             this.logger = logger;
             this.zondaService = zondaService;
+            this.dashboardService = dashboardService;
         }
 
         [HttpGet]
@@ -25,5 +28,10 @@ namespace CryptoTracker.Controllers
         }
 
 
+        [HttpGet("GetTotalInvestment")]
+        public async Task<object> GetTotalInvestment()
+        {
+            return await dashboardService.GetWalletAsync();
+        }
     }
 }

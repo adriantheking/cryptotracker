@@ -35,13 +35,13 @@ namespace CryptoCommon.Services
         public async Task<decimal> GetInvestedAmountAsync()
         {
             var types = new string[] { ADD_FUNDS_PROP, SUBTRACT_FUNDS_PROP, WITHDRAWAL_SUBTRACT_FUNDS_PROP };
-            var accountTypes = new string[] { "FIAT" };
+            var accountTypes = new string[] { "FIAT" }; //TODO: HANDLE
             var operations = await this.GetOperationsAsync(types, accountType: accountTypes);
             try
             {
                 if (operations != null && operations.Items != null)
                 {
-                    return operations.Items.Sum(x => x.Value).Value;
+                    return operations.Items.Where(x => x.Balance.Currency.Equals("PLN")).Sum(x => x.Value).Value; //TODO: HANDLE
                 }
             }
             catch (Exception ex)

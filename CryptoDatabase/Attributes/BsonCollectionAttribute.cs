@@ -1,4 +1,4 @@
-﻿namespace CryptoCommon.Attributes
+﻿namespace CryptoDatabase.Attributes
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class BsonCollectionAttribute : Attribute

@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace CryptoCommon.Repositories.Interfaces
+namespace CryproDatabase.Repositories.Interfaces
 {
     public interface IDocument
     {

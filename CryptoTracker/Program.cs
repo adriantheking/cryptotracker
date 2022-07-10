@@ -1,11 +1,11 @@
-using Binance.Common;
 using CryptoCommon.Connectors;
 using CryptoCommon.Connectors.Interfaces;
 using CryptoCommon.Options;
-using CryptoCommon.Repositories;
-using CryptoCommon.Repositories.Interfaces;
 using CryptoCommon.Services;
 using CryptoCommon.Services.Interfaces;
+using CryptoDatabase.Options;
+using CryptoDatabase.Repositories;
+using CryptoDatabase.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +18,8 @@ builder.Services.AddSingleton<IBinance, BinanceConnector>();
 //services
 builder.Services.AddTransient<IZondaService, ZondaService>();
 builder.Services.AddTransient<IBinanceService, CryptoCommon.Services.BinanceService>();
-builder.Services.AddScoped<typeof(IMongoRepository<>), typeof(MongoRepository<>) > ();
+builder.Services.AddTransient<IDashboardService, DashboardService>();
+builder.Services.AddScoped(typeof(IMongoRepository<>), typeof(MongoRepository<>));
 //httpclients
 builder.Services.AddHttpClient<IBinance, BinanceConnector>();
 
@@ -31,10 +32,11 @@ builder.Services.AddLazyCache();
 //cors
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("default", policy => {
+    options.AddPolicy("default", policy =>
+    {
         policy.AllowAnyMethod();
         policy.AllowAnyOrigin();
-        policy.AllowAnyHeader(); 
+        policy.AllowAnyHeader();
     });
 });
 builder.Services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_3_0);

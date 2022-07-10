@@ -1,6 +1,7 @@
-﻿using System.Linq.Expressions;
+﻿using CryproDatabase.Repositories.Interfaces;
+using System.Linq.Expressions;
 
-namespace CryptoCommon.Repositories.Interfaces
+namespace CryptoDatabase.Repositories.Interfaces
 {
     public interface IMongoRepository<TDocument> where TDocument : IDocument
     {

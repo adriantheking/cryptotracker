@@ -1,12 +1,13 @@
-﻿using CryptoCommon.Attributes;
-using CryptoCommon.Options;
-using CryptoCommon.Repositories.Interfaces;
+﻿using CryproDatabase.Repositories.Interfaces;
+using CryptoDatabase.Attributes;
+using CryptoDatabase.Options;
+using CryptoDatabase.Repositories.Interfaces;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Linq.Expressions;
 
-namespace CryptoCommon.Repositories
+namespace CryptoDatabase.Repositories
 {
     public class MongoRepository<TDocument> : IMongoRepository<TDocument> where TDocument : IDocument
     {

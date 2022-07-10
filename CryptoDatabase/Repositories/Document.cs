@@ -1,7 +1,7 @@
-﻿using CryptoCommon.Repositories.Interfaces;
+﻿using CryproDatabase.Repositories.Interfaces;
 using MongoDB.Bson;
 
-namespace CryptoCommon.Repositories
+namespace CryptoDatabase.Repositories
 {
     public abstract class Document : IDocument
     {
