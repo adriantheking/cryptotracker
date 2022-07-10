@@ -2,6 +2,8 @@ using Binance.Common;
 using CryptoCommon.Connectors;
 using CryptoCommon.Connectors.Interfaces;
 using CryptoCommon.Options;
+using CryptoCommon.Repositories;
+using CryptoCommon.Repositories.Interfaces;
 using CryptoCommon.Services;
 using CryptoCommon.Services.Interfaces;
 
@@ -16,12 +18,14 @@ builder.Services.AddSingleton<IBinance, BinanceConnector>();
 //services
 builder.Services.AddTransient<IZondaService, ZondaService>();
 builder.Services.AddTransient<IBinanceService, CryptoCommon.Services.BinanceService>();
+builder.Services.AddScoped<typeof(IMongoRepository<>), typeof(MongoRepository<>) > ();
 //httpclients
 builder.Services.AddHttpClient<IBinance, BinanceConnector>();
 
 //options 
 builder.Services.Configure<ZondaConnectorOptions>(builder.Configuration.GetSection(ZondaConnectorOptions.SectionName));
 builder.Services.Configure<BinanceConnectorOptions>(builder.Configuration.GetSection(BinanceConnectorOptions.SectionName));
+builder.Services.Configure<MongoOptions>(builder.Configuration.GetSection(MongoOptions.SectionName));
 //other
 builder.Services.AddLazyCache();
 //cors
