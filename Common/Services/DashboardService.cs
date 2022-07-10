@@ -49,6 +49,9 @@ namespace CryptoCommon.Services
         {
             try
             {
+                if (string.IsNullOrEmpty(userId))
+                    throw new ArgumentNullException("userId cannot be null");
+
                 var finalWallet = new MongoWallet() //final output
                 {
                     UserId = userId,
