@@ -11,11 +11,12 @@ namespace CryptoCommon.Services.Interfaces
         /// <returns></returns>
         Task<MongoWallet> GetWalletAsync();
         /// <summary>
-        /// Fill wallet data in database with required data in dashboard
+        /// Sync wallet data in database with required data in dashboard
         /// </summary>
         /// <param name="userId"></param>
+        /// <param name="wallet">Wallet to synchronize. If empty new will be created</param>
         /// <returns></returns>
-        Task<MongoWallet> FillWalletAsync(string userId);
+        Task<MongoWallet> SyncWalletAsync(string userId, MongoWallet? wallet = null);
         Task<TransactionHistoryModel> GetTransactionsAsync();
     }
 }

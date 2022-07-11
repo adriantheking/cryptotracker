@@ -40,35 +40,47 @@ namespace CryptoCommon.Services
             //
             if (wallet == null)
             {
-                return await FillWalletAsync(userid);
+                return await SyncWalletAsync(userid);
             }
             return wallet;
         }
 
-        public async Task<MongoWallet> FillWalletAsync(string userId)
+        public async Task<MongoWallet> SyncWalletAsync(string userId, MongoWallet? wallet = null)
         {
             try
             {
-                if (string.IsNullOrEmpty(userId))
-                    throw new ArgumentNullException("userId cannot be null");
+                if (string.IsNullOrEmpty(userId) && wallet == null)
+                    throw new ArgumentNullException("UserId or Wallet needs to be provided");
 
-                var finalWallet = new MongoWallet() //final output
+                MongoWallet finalWallet;
+                if (wallet != null)
                 {
-                    UserId = userId,
-                    Invested = new List<InvestedAmountWallet>()
-                };
+                    finalWallet = wallet;
+                    finalWallet.Invested = new List<InvestedAmountWallet>();
+                }
+                else
+                    finalWallet = new MongoWallet() //final output
+                    {
+                        UserId = userId,
+                        Invested = new List<InvestedAmountWallet>()
+                    };
                 //BINANCE DATA
                 var binanceInvestedData = await binanceService.GetInvestedAmountAsync(); //get data from binance
-                var transformedBinanceObject = binanceInvestedData.Select(x => new InvestedAmountWallet() { Value = x.Value, 
+                var transformedBinanceObject = binanceInvestedData.Select(x => new InvestedAmountWallet()
+                {
+                    Value = x.Value,
                     Fiat = x.Fiat,
                     Source = nameof(IBinance),
                 }).ToList(); //transform to model
 
                 //ZONDA DATA
                 var zondaInvestedData = await zondaService.GetInvestedAmountAsync(); // get data from zonda
-                var transformedZondaObject = new InvestedAmountWallet() { Value = zondaInvestedData,
+                var transformedZondaObject = new InvestedAmountWallet()
+                {
+                    Value = zondaInvestedData,
                     Fiat = "PLN", //TODO: handle
-                    Source = nameof(IZonda) };
+                    Source = nameof(IZonda)
+                };
 
                 finalWallet.Invested.AddRange(transformedBinanceObject);
                 finalWallet.Invested.Add(transformedZondaObject);

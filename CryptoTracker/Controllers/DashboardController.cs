@@ -28,8 +28,8 @@ namespace CryptoTracker.Controllers
         }
 
 
-        [HttpGet("GetTotalInvestment")]
-        public async Task<object> GetTotalInvestment()
+        [HttpGet("GetWallet")]
+        public async Task<object> GetWallet()
         {
             return await dashboardService.GetWalletAsync();
         }
