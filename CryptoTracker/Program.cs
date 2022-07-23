@@ -29,6 +29,7 @@ builder.Services.Configure<BinanceConnectorOptions>(builder.Configuration.GetSec
 builder.Services.Configure<MongoOptions>(builder.Configuration.GetSection(MongoOptions.SectionName));
 //other
 builder.Services.AddLazyCache();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 //cors
 builder.Services.AddCors(options =>
 {

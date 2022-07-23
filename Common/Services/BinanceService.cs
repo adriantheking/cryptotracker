@@ -1,58 +1,63 @@
-﻿using Binance.Spot.Models;
+﻿using AutoMapper;
+using Binance.Spot.Models;
 using CryptoCommon.Connectors.Interfaces;
 using CryptoCommon.Services.Interfaces;
 using CryptoCommon.Utilities.Binance;
+using CryptoDatabase.Repositories.Binance;
+using CryptoDatabase.Repositories.Interfaces;
 using Microsoft.Extensions.Logging;
-using Models.Connectors.Binance;
+using BinanceModel = Models.Connectors.Binance;
 
 namespace CryptoCommon.Services
 {
     public class BinanceService : IBinanceService
     {
         private readonly ILogger<BinanceService> logger;
+        private readonly IMapper mapper;
         private readonly IBinance binance;
+        private readonly IMongoRepository<CryptoDatabase.Repositories.Binance.BinanceC2CTradeHistory> c2CRepository;
 
         public BinanceService(ILogger<BinanceService> logger,
-            IBinance binance)
+            IMapper mapper,
+            IBinance binance,
+            IMongoRepository<CryptoDatabase.Repositories.Binance.BinanceC2CTradeHistory> c2cRepository)
         {
             this.logger = logger;
+            this.mapper = mapper;
             this.binance = binance;
+            c2CRepository = c2cRepository;
         }
 
         public async Task<BinanceC2CTradeHistory> GetC2CTradeHistoryAsync(Side side, int yearsToRead = 2)
         {
+            var userId = "1111"; //TODO: handle it
             var stopYear = DateTime.Now.AddYears(-yearsToRead); //subsctract years
             var endDay = DateTime.UtcNow;
             var startDay = endDay.AddDays(-30);
 
             var endTimespan = ((DateTimeOffset)endDay).ToUnixTimeMilliseconds(); //ends today
             var startTimespan = ((DateTimeOffset)startDay).ToUnixTimeMilliseconds(); //start 30days before
-            BinanceC2CTradeHistory? binanceC2CTradeHistory = null;
-
+            BinanceC2CTradeHistory binanceC2CTradeHistory = new BinanceC2CTradeHistory();
+            binanceC2CTradeHistory.UserId = userId;
+            binanceC2CTradeHistory.Data = new List<BinanceC2CTradeHistoryData>();
             do
             {
-                BinanceC2CTradeHistory history = null;
+                BinanceModel.BinanceC2CTradeHistory history = null;
                 try
                 {
                     history = await binance.GetC2CHistoryAsync(side, startTimespan, endTimespan);
+                    if (history != null && history.Data != null && history.Data.Any())
+                    {
+                        binanceC2CTradeHistory.Total += history.Total;
+                        binanceC2CTradeHistory?.Data?.AddRange(mapper.Map<List<BinanceModel.BinanceC2CTradeHistoryData>, List<BinanceC2CTradeHistoryData>>(history.Data)); //append results to main object
+                    }
                 }
                 catch (Exception ex)
                 {
                     logger.LogError(ex, ex?.Message, ex?.InnerException);
                     throw;
                 }
-                if (binanceC2CTradeHistory == null)
-                {
-                    binanceC2CTradeHistory = history;
-                }
-                else
-                {
-                    if (history != null && history.Data != null && history.Data.Any())
-                    {
-                        binanceC2CTradeHistory?.Data?.AddRange(history.Data); //append results to main object
-                        binanceC2CTradeHistory.Total += history.Total;
-                    }               
-                }
+
                 //increase counters
                 endDay = startDay;
                 startDay = startDay.AddDays(-30);
@@ -100,10 +105,11 @@ namespace CryptoCommon.Services
         /// <param name="newData"></param>
         /// <param name="source"></param>
         /// <returns></returns>
-        private List<InvestedAmountModel> AddInvestments(List<InvestedAmountModel> newData, ref List<InvestedAmountModel> source) 
+        private List<InvestedAmountModel> AddInvestments(List<InvestedAmountModel> newData, ref List<InvestedAmountModel> source)
         {
-            foreach(var record in newData) { 
-                if(source.Any(s => s.Fiat.ToUpper().Equals(record.Fiat.ToUpper())))
+            foreach (var record in newData)
+            {
+                if (source.Any(s => s.Fiat.ToUpper().Equals(record.Fiat.ToUpper())))
                 {
                     source.Where(s => s.Fiat.ToUpper().Equals(record.Fiat.ToUpper())).FirstOrDefault().Value += record.Value;
                 }
