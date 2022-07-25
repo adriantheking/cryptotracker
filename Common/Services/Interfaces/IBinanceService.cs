@@ -1,5 +1,6 @@
 ﻿using Binance.Spot.Models;
-using Models.Connectors.Binance;
+using CryptoDatabase.Repositories;
+using CryptoDatabase.Repositories.Binance;
 
 namespace CryptoCommon.Services.Interfaces
 {
@@ -17,6 +18,14 @@ namespace CryptoCommon.Services.Interfaces
         /// Returns total invested amount from all sources
         /// </summary>
         /// <returns></returns>
-        Task<List<InvestedAmountModel>> GetInvestedAmountAsync();
+        Task<List<InvestedAmountWallet>> GetInvestedAmountAsync(BinanceC2CTradeHistory c2cHistory);
+        /// <summary>
+        /// Synchronize Binance wallet including:
+        /// - C2C Trade history list
+        /// - Total Invested Amount of fiats
+        /// </summary>
+        /// <param name="yearsToRead">How many years to read data</param>
+        /// <returns></returns>
+        Task<Wallet> SyncWalletAsync(int yearsToRead = 2);
     }
 }

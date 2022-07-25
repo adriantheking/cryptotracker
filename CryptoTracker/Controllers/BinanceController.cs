@@ -25,17 +25,13 @@ namespace CryptoTracker.Controllers
         [HttpGet("c2cHistory")]
         public async Task<object> Index()
         {
-            return (await this.binanceService.GetInvestedAmountAsync());
-            //return (await this.binanceConnector.GetC2CHistoryAsync(Side.BUY));
+            return Ok();
         }
 
         [HttpGet("GetInvestedAmount")]
         public async Task<object> GetInvestedAmount()
         {
-            return await this.cache.GetOrAddAsync("BINANCE_INVESTED_AMOUNT", async () =>
-            {
-                return await this.binanceService.GetInvestedAmountAsync();
-            }, TimeSpan.FromHours(1));
+            return Ok();
         }
     }
 }

@@ -3,6 +3,7 @@ using Binance.Spot.Models;
 using CryptoCommon.Connectors.Interfaces;
 using CryptoCommon.Services.Interfaces;
 using CryptoCommon.Utilities.Binance;
+using CryptoDatabase.Repositories;
 using CryptoDatabase.Repositories.Binance;
 using CryptoDatabase.Repositories.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -16,16 +17,19 @@ namespace CryptoCommon.Services
         private readonly IMapper mapper;
         private readonly IBinance binance;
         private readonly IMongoRepository<CryptoDatabase.Repositories.Binance.BinanceC2CTradeHistory> c2CRepository;
+        private readonly IMongoRepository<Wallet> walletRepository;
 
         public BinanceService(ILogger<BinanceService> logger,
             IMapper mapper,
             IBinance binance,
-            IMongoRepository<CryptoDatabase.Repositories.Binance.BinanceC2CTradeHistory> c2cRepository)
+            IMongoRepository<CryptoDatabase.Repositories.Binance.BinanceC2CTradeHistory> c2cRepository,
+            IMongoRepository<Wallet> walletRepository)
         {
             this.logger = logger;
             this.mapper = mapper;
             this.binance = binance;
             c2CRepository = c2cRepository;
+            this.walletRepository = walletRepository;
         }
 
         public async Task<BinanceC2CTradeHistory> GetC2CTradeHistoryAsync(Side side, int yearsToRead = 2)
@@ -68,15 +72,57 @@ namespace CryptoCommon.Services
             return binanceC2CTradeHistory ?? new BinanceC2CTradeHistory();
         }
 
-        public async Task<List<InvestedAmountModel>> GetInvestedAmountAsync()
+        public async Task<List<InvestedAmountWallet>> GetInvestedAmountAsync(BinanceC2CTradeHistory c2cHistory)
         {
-            List<InvestedAmountModel> investedAmountModel = new List<InvestedAmountModel>();
+            List<InvestedAmountWallet> investedAmountModel = new List<InvestedAmountWallet>();
             //C2C Investment
-            var totalC2CInvestment = await GetC2CTradeHistoryAsync(Side.BUY);
+            var totalC2CInvestment = c2cHistory;
             var sumOfC2CInvestment = CalculateFromC2CRecords(totalC2CInvestment);
             AddInvestments(sumOfC2CInvestment, ref investedAmountModel);
 
             return investedAmountModel;
+        }
+
+
+        public async Task<Wallet> SyncWalletAsync(int yearsToRead = 2)
+        {
+            var userId = "1111"; //TODO: handle it
+            var c2cHistory = await GetC2CTradeHistoryAsync(Side.BUY, yearsToRead);
+            var investedAmount = await GetInvestedAmountAsync(c2cHistory);
+            bool isNewWallet = false;
+            bool isNewTradeHistory = false;
+
+            var wallet = await walletRepository.FindOneAsync(x => x.UserId.Equals(userId));
+            if (wallet == null || string.IsNullOrEmpty(wallet.UserId))
+            {
+                isNewWallet = true;
+                wallet = new Wallet();
+                wallet.UserId = userId;
+            }
+            wallet.Invested = investedAmount;
+
+            var c2cTradeHistory = await c2CRepository.FindOneAsync(x => x.UserId.Equals(userId));
+            if (c2cTradeHistory == null || string.IsNullOrEmpty(c2cTradeHistory.UserId))
+            {
+                isNewTradeHistory = true;
+                c2cTradeHistory = new BinanceC2CTradeHistory();
+                c2cHistory.UserId = userId;
+            }
+            c2cTradeHistory.Data = c2cHistory.Data;
+            c2cTradeHistory.Total = c2cHistory.Total;
+
+
+            if (!isNewWallet)
+                await walletRepository.ReplaceOneAsync(wallet);
+            else
+                await walletRepository.InsertOneAsync(wallet);
+
+            if (!isNewTradeHistory)
+                await c2CRepository.ReplaceOneAsync(c2cTradeHistory);
+            else
+                await c2CRepository.InsertOneAsync(c2cTradeHistory);
+
+            return wallet;
         }
 
         /// <summary>
@@ -84,12 +130,12 @@ namespace CryptoCommon.Services
         /// </summary>
         /// <param name="history"></param>
         /// <returns>List of fiats with invested amount</returns>
-        private List<InvestedAmountModel> CalculateFromC2CRecords(BinanceC2CTradeHistory history)
+        private List<InvestedAmountWallet> CalculateFromC2CRecords(BinanceC2CTradeHistory history)
         {
-            List<InvestedAmountModel> investedAmount = new List<InvestedAmountModel>();
+            List<InvestedAmountWallet> investedAmount = new List<InvestedAmountWallet>();
             BinanceSupportedConsts.Fiats.ForEach(fiat =>
             {
-                InvestedAmountModel record = new InvestedAmountModel();
+                InvestedAmountWallet record = new InvestedAmountWallet();
                 record.Fiat = fiat.ToUpper();
                 record.Value = history.Data.Where(x => x.Fiat.ToUpper().Contains(fiat.ToUpper())).ToList().Sum(x => x.TotalPrice).GetValueOrDefault();//get records for current fiat record                
 
@@ -105,7 +151,7 @@ namespace CryptoCommon.Services
         /// <param name="newData"></param>
         /// <param name="source"></param>
         /// <returns></returns>
-        private List<InvestedAmountModel> AddInvestments(List<InvestedAmountModel> newData, ref List<InvestedAmountModel> source)
+        private List<InvestedAmountWallet> AddInvestments(List<InvestedAmountWallet> newData, ref List<InvestedAmountWallet> source)
         {
             foreach (var record in newData)
             {

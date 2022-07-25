@@ -35,13 +35,7 @@ namespace CryptoCommon.Services
         {
             var userid = "1111"; //TODO: Handle it
             var wallet = await walletRepository.FindOneAsync(f => f.UserId.Equals(userid));
-            //
-            //If there is no wallet in database try to call to services and fill data
-            //
-            if (wallet == null)
-            {
-                return await SyncWalletAsync(userid);
-            }
+            
             return wallet;
         }
 
@@ -49,44 +43,7 @@ namespace CryptoCommon.Services
         {
             try
             {
-                if (string.IsNullOrEmpty(userId) && wallet == null)
-                    throw new ArgumentNullException("UserId or Wallet needs to be provided");
-
-                MongoWallet finalWallet;
-                if (wallet != null)
-                {
-                    finalWallet = wallet;
-                    finalWallet.Invested = new List<InvestedAmountWallet>();
-                }
-                else
-                    finalWallet = new MongoWallet() //final output
-                    {
-                        UserId = userId,
-                        Invested = new List<InvestedAmountWallet>()
-                    };
-                //BINANCE DATA
-                var binanceInvestedData = await binanceService.GetInvestedAmountAsync(); //get data from binance
-                var transformedBinanceObject = binanceInvestedData.Select(x => new InvestedAmountWallet()
-                {
-                    Value = x.Value,
-                    Fiat = x.Fiat,
-                    Source = nameof(IBinance),
-                }).ToList(); //transform to model
-
-                //ZONDA DATA
-                var zondaInvestedData = await zondaService.GetInvestedAmountAsync(); // get data from zonda
-                var transformedZondaObject = new InvestedAmountWallet()
-                {
-                    Value = zondaInvestedData,
-                    Fiat = "PLN", //TODO: handle
-                    Source = nameof(IZonda)
-                };
-
-                finalWallet.Invested.AddRange(transformedBinanceObject);
-                finalWallet.Invested.Add(transformedZondaObject);
-                await walletRepository.InsertOneAsync(finalWallet);
-
-                return finalWallet;
+                return await binanceService.SyncWalletAsync();
             }
             catch (Exception ex)
             {

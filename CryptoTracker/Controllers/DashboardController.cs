@@ -33,5 +33,10 @@ namespace CryptoTracker.Controllers
         {
             return await dashboardService.GetWalletAsync();
         }
+        [HttpGet("SyncWallet")]
+        public async Task<object> SyncWallet()
+        {
+            return await dashboardService.SyncWalletAsync("1111");
+        }
     }
 }
