@@ -44,6 +44,7 @@ namespace CryptoCommon.Services
             BinanceC2CTradeHistory binanceC2CTradeHistory = new BinanceC2CTradeHistory();
             binanceC2CTradeHistory.UserId = userId;
             binanceC2CTradeHistory.Data = new List<BinanceC2CTradeHistoryData>();
+            binanceC2CTradeHistory.Total = 0;
             do
             {
                 BinanceModel.BinanceC2CTradeHistory history = null;
@@ -106,7 +107,7 @@ namespace CryptoCommon.Services
             {
                 isNewTradeHistory = true;
                 c2cTradeHistory = new BinanceC2CTradeHistory();
-                c2cHistory.UserId = userId;
+                c2cTradeHistory.UserId = userId;
             }
             c2cTradeHistory.Data = c2cHistory.Data;
             c2cTradeHistory.Total = c2cHistory.Total;
@@ -138,7 +139,7 @@ namespace CryptoCommon.Services
                 InvestedAmountWallet record = new InvestedAmountWallet();
                 record.Fiat = fiat.ToUpper();
                 record.Value = history.Data.Where(x => x.Fiat.ToUpper().Contains(fiat.ToUpper())).ToList().Sum(x => x.TotalPrice).GetValueOrDefault();//get records for current fiat record                
-
+                record.Source = nameof(IBinance);
                 investedAmount.Add(record);
             });
 
@@ -157,7 +158,9 @@ namespace CryptoCommon.Services
             {
                 if (source.Any(s => s.Fiat.ToUpper().Equals(record.Fiat.ToUpper())))
                 {
-                    source.Where(s => s.Fiat.ToUpper().Equals(record.Fiat.ToUpper())).FirstOrDefault().Value += record.Value;
+                    var obj = source.Where(s => s.Fiat.ToUpper().Equals(record.Fiat.ToUpper())).FirstOrDefault();
+                    obj.Value += record.Value;
+                    obj.Source = nameof(IBinance);
                 }
                 else
                 {
