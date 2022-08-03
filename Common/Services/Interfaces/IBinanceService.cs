@@ -26,6 +26,6 @@ namespace CryptoCommon.Services.Interfaces
         /// </summary>
         /// <param name="yearsToRead">How many years to read data</param>
         /// <returns></returns>
-        Task<Wallet> SyncWalletAsync(int yearsToRead = 2);
+        Task<Wallet> SyncWalletAsync(int yearsToRead = 2, bool saveToDb = true);
     }
 }

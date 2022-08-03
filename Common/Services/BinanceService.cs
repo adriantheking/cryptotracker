@@ -85,7 +85,7 @@ namespace CryptoCommon.Services
         }
 
 
-        public async Task<Wallet> SyncWalletAsync(int yearsToRead = 2)
+        public async Task<Wallet> SyncWalletAsync(int yearsToRead = 2, bool saveToDb = true)
         {
             var userId = "1111"; //TODO: handle it
             var c2cHistory = await GetC2CTradeHistoryAsync(Side.BUY, yearsToRead);
@@ -113,10 +113,11 @@ namespace CryptoCommon.Services
             c2cTradeHistory.Total = c2cHistory.Total;
 
 
-            if (!isNewWallet)
-                await walletRepository.ReplaceOneAsync(wallet);
-            else
-                await walletRepository.InsertOneAsync(wallet);
+            if (saveToDb)
+                if (!isNewWallet)
+                    await walletRepository.ReplaceOneAsync(wallet);
+                else
+                    await walletRepository.InsertOneAsync(wallet);
 
             if (!isNewTradeHistory)
                 await c2CRepository.ReplaceOneAsync(c2cTradeHistory);

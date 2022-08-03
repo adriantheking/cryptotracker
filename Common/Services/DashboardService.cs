@@ -39,11 +39,31 @@ namespace CryptoCommon.Services
             return wallet;
         }
 
-        public async Task<MongoWallet> SyncWalletAsync(string userId, MongoWallet? wallet = null)
+        public async Task<MongoWallet> SyncWalletAsync(string userId)
         {
             try
             {
-                return await binanceService.SyncWalletAsync();
+                var zondaWallet = await zondaService.SyncWalletAsync(false);
+                var binanceWallet = await binanceService.SyncWalletAsync(saveToDb: false);
+                var isNewWallet = false;
+                var wallet = await walletRepository.FindOneAsync(x => x.UserId.Equals(userId));
+                if (wallet == null || string.IsNullOrEmpty(wallet.UserId))
+                {
+                    isNewWallet = true;
+                    wallet = new Wallet();
+                    wallet.UserId = userId;
+                }
+                wallet.Invested = new List<InvestedAmountWallet>();
+                if(zondaWallet != null && zondaWallet.Invested != null)
+                    wallet.Invested.AddRange(zondaWallet.Invested);
+                if(binanceWallet != null && binanceWallet.Invested != null)
+                    wallet.Invested.AddRange(binanceWallet.Invested);
+
+                if (!isNewWallet)
+                    await walletRepository.ReplaceOneAsync(wallet);
+                else
+                    await walletRepository.InsertOneAsync(wallet);
+                return wallet;
             }
             catch (Exception ex)
             {

@@ -16,7 +16,7 @@ namespace CryptoCommon.Services.Interfaces
         /// <param name="userId"></param>
         /// <param name="wallet">Wallet to synchronize. If empty new will be created</param>
         /// <returns></returns>
-        Task<MongoWallet> SyncWalletAsync(string userId, MongoWallet? wallet = null);
+        Task<MongoWallet> SyncWalletAsync(string userId);
         Task<TransactionHistoryModel> GetTransactionsAsync();
     }
 }
