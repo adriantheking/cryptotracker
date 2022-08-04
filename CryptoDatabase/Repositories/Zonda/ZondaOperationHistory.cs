@@ -8,15 +8,13 @@ namespace CryptoDatabase.Repositories.Zonda
         public string? UserId { get; set; }
         public string? Status { get; set; }
 
-        public List<ZondaOperationHistoryItem>? Items { get; set; }
+        public ZondaOperationHistoryItem[]? Items { get; set; }
 
         public int? FetchedRows { get; set; }
 
         public int? Limit { get; set; }
 
         public int? Offset { get; set; }
-
-        public ZondaOperationHistorySetting? Settings { get; set; }
 
         public object? Errors { get; set; }
     }
@@ -80,40 +78,5 @@ namespace CryptoDatabase.Repositories.Zonda
         public object? Available { get; set; }
 
         public object? Locked { get; set; }
-    }
-
-
-
-
-    public class ZondaOperationHistorySetting
-    {
-        public object? BalancesId { get; set; }
-
-        public List<object>? BalanceCurrencies { get; set; }
-
-        public List<object>? BalanceTypes { get; set; }
-        public List<string>? Users { get; set; }
-        public string? Engine { get; set; }
-
-        public int? FromTime { get; set; }
-
-        public long? ToTime { get; set; }
-
-        public bool? AbsValue { get; set; }
-
-
-        public object? FromValue { get; set; }
-
-
-        public object? ToValue { get; set; }
-
-
-        public List<object>? Sort { get; set; }
-
-        public int? Limit { get; set; }
-
-        public int? Offset { get; set; }
-
-        public object? Types { get; set; }
     }
 }

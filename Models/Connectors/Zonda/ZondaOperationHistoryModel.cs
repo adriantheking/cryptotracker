@@ -28,9 +28,6 @@ namespace Models.Connectors.Zonda
         [JsonProperty("totalTime")]
         public int? TotalTime { get; set; }
 
-        [JsonProperty("settings")]
-        public ZondaOperationHistorySettingModel? Settings { get; set; }
-
         [JsonProperty("errors")]
         public object? Errors { get; set; }
     }
@@ -117,54 +114,6 @@ namespace Models.Connectors.Zonda
 
         [JsonProperty("locked")]
         public object? Locked { get; set; }
-    }
-
-
-
-
-    public class ZondaOperationHistorySettingModel
-    {
-        [JsonProperty("balancesId")]
-        public object? BalancesId { get; set; }
-
-        [JsonProperty("balanceCurrencies")]
-        public List<object>? BalanceCurrencies { get; set; }
-
-        [JsonProperty("balanceTypes")]
-        public List<object>? BalanceTypes { get; set; }
-
-        [JsonProperty("users")]
-        public List<string>? Users { get; set; }
-
-        [JsonProperty("engine")]
-        public string? Engine { get; set; }
-
-        [JsonProperty("fromTime")]
-        public int? FromTime { get; set; }
-
-        [JsonProperty("toTime")]
-        public long? ToTime { get; set; }
-
-        [JsonProperty("absValue")]
-        public bool? AbsValue { get; set; }
-
-        [JsonProperty("fromValue")]
-        public object? FromValue { get; set; }
-
-        [JsonProperty("toValue")]
-        public object? ToValue { get; set; }
-
-        [JsonProperty("sort")]
-        public List<object>? Sort { get; set; }
-
-        [JsonProperty("limit")]
-        public int? Limit { get; set; }
-
-        [JsonProperty("offset")]
-        public int? Offset { get; set; }
-
-        [JsonProperty("types")]
-        public object? Types { get; set; }
     }
 
 

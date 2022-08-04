@@ -141,7 +141,6 @@ namespace CryptoCommon.Connectors
                             if (operations != null && operations.Items != null && operations.Items.Any())
                                 operationHistory.Items.AddRange(operations.Items);
 
-                            operationHistory.Settings = operations.Settings;
                             operationHistory.HasNextPage = operations.HasNextPage;
                             operationHistory.Limit = operations.Limit;
                             operationHistory.Offset = operations.Offset;

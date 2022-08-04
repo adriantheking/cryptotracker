@@ -18,7 +18,6 @@ namespace CryptoCommon.AutoMapper
             CreateMap<ZondaModel.ZondaOperationHistoryChangeModel, ZondaOperationHistoryChange>();
             CreateMap<ZondaModel.ZondaOperationHistoryFundsAfterModel, ZondaOperationHistoryFundsAfter>();
             CreateMap<ZondaModel.ZondaOperationHistoryFundsBeforeModel, ZondaOperationHistoryFundsBefore>();
-            CreateMap<ZondaModel.ZondaOperationHistorySettingModel, ZondaOperationHistorySetting>();
         }
     }
 }

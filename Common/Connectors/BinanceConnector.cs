@@ -54,20 +54,18 @@ namespace CryptoCommon.Connectors
             }
         }
 
-        public async Task<List<BinanceAllOrdersHistoryModel>> GetTradeListAsyc(string symbol, long? orderId = null, long? startTime = null, long? endTime = null, long? fromId = null, int? limit = null, long? recvWindow = null)
+        public async Task<List<BinanceAllOrdersHistoryModel>> GetOrdersListAsyc(string symbol, long? orderId = null, long? startTime = null, long? endTime = null, long? fromId = null, int? limit = null, long? recvWindow = null)
         {
             var spotAccountTrade = new SpotAccountTrade(httpClient, options.BaseUrl, options.PublicKey, options.PrivateKey);
 
             try
             {
-                var result = await spotAccountTrade.AccountTradeList(symbol,
-                    orderId,
-                    startTime,
-                    endTime,
-                    fromId,
-                    limit,
-                    recvWindow);
-
+                var result = await spotAccountTrade.AllOrders(symbol: symbol,
+                    orderId: orderId,
+                    startTime: startTime,
+                    endTime: endTime,
+                    limit: limit,
+                    recvWindow: recvWindow);
                 return JsonConvert.DeserializeObject<List<BinanceAllOrdersHistoryModel>>(result);
             }
             catch (Exception ex)

@@ -18,7 +18,7 @@ namespace CryptoCommon.Connectors.Interfaces
         /// <returns></returns>
         Task<BinanceC2CTradeHistory> GetC2CHistoryAsync(Side side, long? startTimestamp = null, long? endTimestamp = null, int? page = null, int? rows = null, long? recvWindow = null);
         /// <summary>
-        /// Returns trade list for account
+        /// Returns orders list for account
         /// </summary>
         /// <param name="symbol">BNBUSDT etc</param>
         /// <param name="orderId"></param>
@@ -28,6 +28,6 @@ namespace CryptoCommon.Connectors.Interfaces
         /// <param name="limit">Rows per page</param>
         /// <param name="recvWindow"></param>
         /// <returns></returns>
-        Task<List<BinanceAllOrdersHistoryModel>> GetTradeListAsyc(string symbol, long? orderId = null, long? startTime = null, long? endTime = null, long? fromId = null, int? limit = null, long? recvWindow = null);
+        Task<List<BinanceAllOrdersHistoryModel>> GetOrdersListAsyc(string symbol, long? orderId = null, long? startTime = null, long? endTime = null, long? fromId = null, int? limit = null, long? recvWindow = null);
     }
 }
