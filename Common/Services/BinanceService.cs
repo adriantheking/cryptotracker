@@ -73,6 +73,39 @@ namespace CryptoCommon.Services
             return binanceC2CTradeHistory ?? new BinanceC2CTradeHistory();
         }
 
+        public async Task<BinanceOrdersHistory> GetBinanceOrdersHistoryAsync(List<string> symbols, int yearsToRead = 2)
+        {
+            var userId = "1111"; //TODO: handle it
+            var stopYear = DateTime.Now.AddYears(-yearsToRead);
+            var endDay = DateTime.UtcNow;
+            var startDay = endDay.AddDays(-30);
+
+            var endTimespan = ((DateTimeOffset)endDay).ToUnixTimeMilliseconds(); //ends today
+            var startTimespan = ((DateTimeOffset)startDay).ToUnixTimeMilliseconds(); //start 30days before
+            BinanceOrdersHistory binanceOrdersHistory = new BinanceOrdersHistory();
+            binanceOrdersHistory.UserId = userId;
+            binanceOrdersHistory.History = new List<BinanceAllOrdersHistory>();
+            foreach (var symbol in symbols)
+            {
+                List<BinanceModel.BinanceAllOrdersHistoryModel> history = null;
+                try
+                {
+                    history = await binance.GetTradeListAsyc(symbol: symbol);
+                    if (history != null && history.Any())
+                    {
+                        var items = mapper.Map<List<BinanceModel.BinanceAllOrdersHistoryModel>, List<BinanceAllOrdersHistory>>(history); //mapper
+                        binanceOrdersHistory.History.AddRange(items); //add new items to main object
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, ex?.Message, ex?.InnerException);
+                    throw;
+                }
+            }
+
+            return binanceOrdersHistory;
+        }
         public async Task<List<InvestedAmountWallet>> GetInvestedAmountAsync(BinanceC2CTradeHistory c2cHistory)
         {
             List<InvestedAmountWallet> investedAmountModel = new List<InvestedAmountWallet>();

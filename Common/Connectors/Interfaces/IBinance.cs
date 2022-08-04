@@ -28,6 +28,6 @@ namespace CryptoCommon.Connectors.Interfaces
         /// <param name="limit">Rows per page</param>
         /// <param name="recvWindow"></param>
         /// <returns></returns>
-        Task<List<BinanceAllOrdersHistory>> GetTradeListAsyc(string symbol, long? orderId = null, long? startTime = null, long? endTime = null, long? fromId = null, int? limit = null, long? recvWindow = null);
+        Task<List<BinanceAllOrdersHistoryModel>> GetTradeListAsyc(string symbol, long? orderId = null, long? startTime = null, long? endTime = null, long? fromId = null, int? limit = null, long? recvWindow = null);
     }
 }

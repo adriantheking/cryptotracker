@@ -26,12 +26,16 @@ import { ZondaService } from "src/app/services/zonda.service";
     }
 
     ngOnInit(): void {
-        this.getDashboard();
-        this.getZondaInvestedAmount();
-        this.getZondaCryptoBalance();
+      this.getWallet();
+        // this.getDashboard();
+        // this.getZondaInvestedAmount();
+        // this.getZondaCryptoBalance();
     }
 
 
+    private getWallet(){
+      this.dashboardService.GetWallet().subscribe(x => console.log(x))
+    }
     public getDashboard(){
         this.dashboardService.GetDashboard().subscribe(x => this.dashboardItems = x);
     }

@@ -11,6 +11,7 @@ namespace CryptoCommon.AutoMapper
         public MappingProfiles()
         {
             CreateMap<BinanceModel.BinanceC2CTradeHistoryData, BinanceC2CTradeHistoryData>();
+            CreateMap<BinanceModel.BinanceAllOrdersHistoryModel, BinanceAllOrdersHistory>();
             CreateMap<ZondaModel.ZondaOperationHistoryModel, ZondaOperationHistory>();
             CreateMap<ZondaModel.ZondaOperationHistoryItemModel, ZondaOperationHistoryItem>();
             CreateMap<ZondaModel.ZondaOperationHistoryBalanceModel, ZondaOperationHistoryBalance>();

@@ -6,6 +6,6 @@ namespace Models.Connectors.Binance
     {
         [JsonProperty("symbol")]
         public string? Symbol { get; set; }
-        public List<BinanceAllOrdersHistory>? Trades { get; set; }
+        public List<BinanceAllOrdersHistoryModel>? Trades { get; set; }
     }
 }

@@ -2,16 +2,16 @@
 
 namespace Models.Connectors.Binance
 {
-    public class BinanceAllOrdersHistory
+    public class BinanceAllOrdersHistoryModel
     {
         [JsonProperty("symbol")]
         public string Symbol { get; set; }
 
         [JsonProperty("orderId")]
-        public int OrderId { get; set; }
+        public long? OrderId { get; set; }
 
         [JsonProperty("orderListId")]
-        public int OrderListId { get; set; }
+        public long? OrderListId { get; set; }
 
         [JsonProperty("clientOrderId")]
         public string ClientOrderId { get; set; }

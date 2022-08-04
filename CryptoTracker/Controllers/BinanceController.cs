@@ -33,5 +33,11 @@ namespace CryptoTracker.Controllers
         {
             return Ok();
         }
+
+        [HttpGet("GetOrders")]
+        public async Task<object> GetOrders()
+        {
+            return await binanceService.GetBinanceOrdersHistoryAsync(new List<string> { "BTCUSDT" });
+        }
     }
 }

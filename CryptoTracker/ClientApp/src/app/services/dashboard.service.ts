@@ -1,6 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
+import { IWallet } from "../models/wallet.model";
 
 @Injectable({
     providedIn: 'root'
@@ -15,6 +16,9 @@ export class DashboardService{
         return this.httpClient.get(this.API_URL+'/Dashboard') as Observable<ZondaTransactionHistoryModel>;
     }
 
+    public GetWallet():Observable<IWallet>{
+        return this.httpClient.get(this.API_URL+'/Dashboard/GetWallet') as Observable<IWallet>;
+    }
 }
 
 export interface ZondaTransactionHistoryModel{
