@@ -6,8 +6,12 @@ namespace CryptoDatabase.Repositories.Binance
     public class BinanceOrdersHistory : Document
     {
         public string? UserId { get; set; }
-        public List<BinanceAllOrdersHistory>? History { get; set; }
+        public List<BinanceOrderHistory>? History { get; set; }
         public int? Total { get; set; }
+    }
+    public class BinanceOrderHistory {
+        public string? Symbol { get; set; }
+        public List<BinanceAllOrdersHistory>? Data { get; set; }
     }
     public class BinanceAllOrdersHistory
     {
@@ -15,7 +19,7 @@ namespace CryptoDatabase.Repositories.Binance
         public long OrderId { get; set; }
         public long OrderListId { get; set; }
         public string ClientOrderId { get; set; }
-        public decimal? Price { get; set; }
+        public string? Price { get; set; }
         public decimal? OrigQty { get; set; }
         public decimal? ExecutedQty { get; set; }
         public decimal? CummulativeQuoteQty { get; set; }

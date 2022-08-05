@@ -17,7 +17,7 @@ namespace Models.Connectors.Binance
         public string ClientOrderId { get; set; }
 
         [JsonProperty("price")]
-        public decimal? Price { get; set; }
+        public string? Price { get; set; }
 
         [JsonProperty("origQty")]
         public decimal? OrigQty { get; set; }

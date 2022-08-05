@@ -87,7 +87,7 @@ namespace CryptoCommon.Services
             var startTimespan = ((DateTimeOffset)startDay).ToUnixTimeMilliseconds(); //start 30days before
             BinanceOrdersHistory binanceOrdersHistory = new BinanceOrdersHistory();
             binanceOrdersHistory.UserId = userId;
-            binanceOrdersHistory.History = new List<BinanceAllOrdersHistory>();
+            binanceOrdersHistory.History = new List<BinanceOrderHistory>();
             foreach (var symbol in symbols)
             {
                 List<BinanceModel.BinanceAllOrdersHistoryModel> history = null;
@@ -97,7 +97,10 @@ namespace CryptoCommon.Services
                     if (history != null && history.Any())
                     {
                         var items = mapper.Map<List<BinanceModel.BinanceAllOrdersHistoryModel>, List<BinanceAllOrdersHistory>>(history); //mapper
-                        binanceOrdersHistory.History.AddRange(items); //add new items to main object
+                        var binanceOrderHistory = new BinanceOrderHistory();
+                        binanceOrderHistory.Symbol = symbol;
+                        binanceOrderHistory.Data = items;
+                        binanceOrdersHistory.History.Add(binanceOrderHistory); //add new items to main object
                     }
                 }
                 catch (Exception ex)
@@ -156,7 +159,7 @@ namespace CryptoCommon.Services
                 isNewOrdersHistory = true;
                 allOrders = new BinanceOrdersHistory();
                 allOrders.UserId = userId;
-                allOrders.History = new List<BinanceAllOrdersHistory>();
+                allOrders.History = new List<BinanceOrderHistory>();
                 allOrders.Total = 0;
             }
             allOrders.History.AddRange(ordersHistory?.History);
