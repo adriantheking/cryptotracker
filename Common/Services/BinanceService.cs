@@ -76,7 +76,7 @@ namespace CryptoCommon.Services
             return binanceC2CTradeHistory ?? new BinanceC2CTradeHistory();
         }
 
-        public async Task<BinanceOrdersHistory> GetBinanceOrdersHistoryAsync(List<string> symbols, int yearsToRead = 2)
+        public async Task<BinanceOrdersHistory> GetSpotOrdersHistoryAsync(List<string> symbols, int yearsToRead = 2)
         {
             var userId = "1111"; //TODO: handle it
             var stopYear = DateTime.Now.AddYears(-yearsToRead);
@@ -129,7 +129,7 @@ namespace CryptoCommon.Services
             var userId = "1111"; //TODO: handle it
             var c2cHistory = await GetC2CTradeHistoryAsync(Side.BUY, yearsToRead);
             var investedAmount = await GetInvestedAmountAsync(c2cHistory);
-            var ordersHistory = await GetBinanceOrdersHistoryAsync(symbols);
+            var ordersHistory = await GetSpotOrdersHistoryAsync(symbols);
             bool isNewWallet = false;
             bool isNewTradeHistory = false;
             bool isNewOrdersHistory = false;

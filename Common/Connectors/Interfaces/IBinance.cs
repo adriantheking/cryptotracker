@@ -29,5 +29,17 @@ namespace CryptoCommon.Connectors.Interfaces
         /// <param name="recvWindow"></param>
         /// <returns></returns>
         Task<List<BinanceAllOrdersHistoryModel>> GetOrdersListAsyc(string symbol, long? orderId = null, long? startTime = null, long? endTime = null, long? fromId = null, int? limit = null, long? recvWindow = null);
+        /// <summary>
+        /// Returns trade list for account
+        /// </summary>
+        /// <param name="symbol">BNBUSDT etc</param>
+        /// <param name="orderId"></param>
+        /// <param name="startTime">Binance UNIX timestamp</param>
+        /// <param name="endTime">Binance UNIX timestamp</param>
+        /// <param name="fromId"></param>
+        /// <param name="limit">Rows per page</param>
+        /// <param name="recvWindow"></param>
+        /// <returns></returns>
+        Task<List<BinanceTradesHistoryModel>> GetTradesListAsync(string symbol, long? orderId = null, long? startTime = null, long? endTime = null, long? fromId = null, int? limit = 500, long? recvWindow = null);
     }
 }

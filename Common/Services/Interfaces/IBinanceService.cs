@@ -18,7 +18,9 @@ namespace CryptoCommon.Services.Interfaces
         /// </summary>
         /// <param name="yearsToRead">Years to read. If startdate and endtime are not set it will use that property.</param>
         /// <returns></returns>
-        Task<BinanceOrdersHistory> GetBinanceOrdersHistoryAsync(List<string> symbols, int yearsToRead = 2);
+        Task<BinanceOrdersHistory> GetSpotOrdersHistoryAsync(List<string> symbols, int yearsToRead = 2);
+
+        Task<BinanceUserTrades> GetSpotTradesHistoryAsync(List<string> symbols);
         //Task<List<BinanceTradeListResponseModel>> Get
         /// <summary>
         /// Returns total invested amount from all sources
