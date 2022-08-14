@@ -3,6 +3,7 @@ using CryptoCommon.Connectors.Interfaces;
 using CryptoCommon.Options;
 using CryptoCommon.Services;
 using CryptoCommon.Services.Interfaces;
+using CryptoCommon.Utilities;
 using CryptoDatabase.Options;
 using CryptoDatabase.Repositories;
 using CryptoDatabase.Repositories.Interfaces;
@@ -28,6 +29,7 @@ builder.Services.Configure<ZondaConnectorOptions>(builder.Configuration.GetSecti
 builder.Services.Configure<BinanceConnectorOptions>(builder.Configuration.GetSection(BinanceConnectorOptions.SectionName));
 builder.Services.Configure<MongoOptions>(builder.Configuration.GetSection(MongoOptions.SectionName));
 //other
+builder.Services.AddTransient<IBinanceSeed, BinanceSeed>();
 builder.Services.AddLazyCache();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 //cors

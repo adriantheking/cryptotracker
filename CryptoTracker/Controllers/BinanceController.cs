@@ -2,6 +2,7 @@
 using CryptoCommon.Connectors;
 using CryptoCommon.Connectors.Interfaces;
 using CryptoCommon.Services.Interfaces;
+using CryptoCommon.Utilities;
 using LazyCache;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,13 +14,16 @@ namespace CryptoTracker.Controllers
     {
         private readonly IAppCache cache;
         private readonly IBinanceService binanceService;
+        private readonly IBinanceSeed seed;
 
         public BinanceController(ILogger<BinanceController> logger,
             IAppCache cache,
-            IBinanceService binanceService)
+            IBinanceService binanceService,
+            IBinanceSeed seed)
         {
             this.cache = cache;
             this.binanceService = binanceService;
+            this.seed = seed;
         }
 
         [HttpGet("c2cHistory")]
@@ -44,6 +48,13 @@ namespace CryptoTracker.Controllers
         public async Task<object> GetTrades()
         {
             return await binanceService.GetSpotTradesHistoryAsync(new List<string> { "BTCUSDT", "ETHUSDT" });
+        }
+
+
+        [HttpGet("Seed")]
+        public async Task Seed()
+        {
+            await seed.Init();
         }
     }
 }

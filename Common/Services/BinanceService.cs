@@ -336,7 +336,8 @@ namespace CryptoCommon.Services
                     {
                         Amount = cointQty,
                         AveragePrice = quoteQty,
-                        Symbol = symbol
+                        Symbol = symbol,
+                        Source = nameof(IBinance)
                     };
                 }
             }
