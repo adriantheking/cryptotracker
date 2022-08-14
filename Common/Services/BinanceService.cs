@@ -137,10 +137,10 @@ namespace CryptoCommon.Services
         public async Task<Wallet> SyncWalletAsync(List<string> symbols, int yearsToRead = 2, bool saveToDb = true)
         {
             var userId = "1111"; //TODO: handle it
-            var c2cHistory = await GetC2CTradeHistoryAsync(Side.BUY, yearsToRead);
+            var c2cHistory = await GetC2CTradeHistoryAsync(Side.BUY, yearsToRead, true);
             var investedAmount = await GetInvestedAmountAsync(c2cHistory);
-            var ordersHistory = await GetSpotOrdersHistoryAsync(symbols);
-            var spotTradesHistory = await GetSpotTradesHistoryAsync(symbols);
+            var ordersHistory = await GetSpotOrdersHistoryAsync(symbols, true);
+            var spotTradesHistory = await GetSpotTradesHistoryAsync(symbols, true);
 
             bool isNewWallet = false;
             bool isNewTradeHistory = false;
@@ -362,8 +362,13 @@ namespace CryptoCommon.Services
                     var symbolTrades = trades.Trades.FirstOrDefault(x => x.Symbol.Equals(symb));
                     if (symbolTrades != null && symbolTrades.Data != null && symbolTrades.Data.Any())
                     {
-                        var cointQty = symbolTrades.Data.Sum(x => x.Qty); //number of bought
-                        var quoteQty = symbolTrades.Data.Sum(x => x.QuoteQty); //value of spend money
+                        var buyerCoinQty = symbolTrades.Data.Where(x => x.IsBuyer.HasValue && x.IsBuyer.Value).Sum(x => x.Qty);
+                        var buyerQuoteQty = symbolTrades.Data.Where(x => x.IsBuyer.HasValue && x.IsBuyer.Value).Sum(x => x.QuoteQty);
+                        var sellerCoinQty = symbolTrades.Data.Where(x => x.IsBuyer.HasValue && !x.IsBuyer.Value).Sum(x => x.Qty);
+                        var sellerQuoteQty = symbolTrades.Data.Where(x => x.IsBuyer.HasValue && !x.IsBuyer.Value).Sum(x => x.QuoteQty);
+
+                        var cointQty = buyerCoinQty - sellerCoinQty; //number of bought
+                        var quoteQty = buyerQuoteQty - sellerQuoteQty; //value of spend money
                         var coinInfo = new CoinInfoWallet()
                         {
                             Amount = cointQty,
