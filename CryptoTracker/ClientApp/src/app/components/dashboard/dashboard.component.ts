@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild } from "@angular/core";
 import { ChartData, ChartType } from "chart.js";
 import { BaseChartDirective } from "ng2-charts";
+import { IWallet } from "src/app/models/wallet.model";
 import { ZondaCryptoBalanceModel } from "src/app/models/zonda/zondaCryptoBalance.model";
 import { DashboardService, ZondaTransactionHistoryModel } from "src/app/services/dashboard.service";
 import { ZondaService } from "src/app/services/zonda.service";
@@ -11,6 +12,7 @@ import { ZondaService } from "src/app/services/zonda.service";
   })
   export class DashboardComponent implements OnInit {
     @ViewChild(BaseChartDirective) chart: BaseChartDirective | undefined;
+    public wallet: IWallet = {};
     public dashboardItems?: ZondaTransactionHistoryModel;
     public zondaInvestedAmount: number = 0;
     public zondaCryptoBalances: ZondaCryptoBalanceModel[] = [];
@@ -34,7 +36,9 @@ import { ZondaService } from "src/app/services/zonda.service";
 
 
     private getWallet(){
-      this.dashboardService.GetWallet().subscribe(x => console.log(x))
+      this.dashboardService.GetWallet().subscribe(x => {
+        this.wallet = x
+      });
     }
     public getDashboard(){
         this.dashboardService.GetDashboard().subscribe(x => this.dashboardItems = x);
