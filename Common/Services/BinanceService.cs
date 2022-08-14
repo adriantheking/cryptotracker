@@ -19,13 +19,15 @@ namespace CryptoCommon.Services
         private readonly IMongoRepository<CryptoDatabase.Repositories.Binance.BinanceC2CTradeHistory> c2CRepository;
         private readonly IMongoRepository<Wallet> walletRepository;
         private readonly IMongoRepository<BinanceOrdersHistory> ordersHistoryRepository;
+        private readonly IMongoRepository<BinanceUserTrades> userTradesRepository;
 
         public BinanceService(ILogger<BinanceService> logger,
             IMapper mapper,
             IBinance binance,
             IMongoRepository<CryptoDatabase.Repositories.Binance.BinanceC2CTradeHistory> c2cRepository,
             IMongoRepository<Wallet> walletRepository,
-            IMongoRepository<BinanceOrdersHistory> ordersHistoryRepository)
+            IMongoRepository<BinanceOrdersHistory> ordersHistoryRepository,
+            IMongoRepository<BinanceUserTrades> userTradesRepository)
         {
             this.logger = logger;
             this.mapper = mapper;
@@ -33,11 +35,19 @@ namespace CryptoCommon.Services
             c2CRepository = c2cRepository;
             this.walletRepository = walletRepository;
             this.ordersHistoryRepository = ordersHistoryRepository;
+            this.userTradesRepository = userTradesRepository;
         }
 
-        public async Task<BinanceC2CTradeHistory> GetC2CTradeHistoryAsync(Side side, int yearsToRead = 2)
+        public async Task<BinanceC2CTradeHistory> GetC2CTradeHistoryAsync(Side side, int yearsToRead = 2, bool forceSync = false)
         {
             var userId = "1111"; //TODO: handle it
+            if (!forceSync)
+            {
+                var history = await c2CRepository.FindOneAsync(x => x.UserId.Equals(userId));
+                if (history != null)
+                    return history;
+            }
+
             var stopYear = DateTime.Now.AddYears(-yearsToRead); //subsctract years
             var endDay = DateTime.UtcNow;
             var startDay = endDay.AddDays(-30);
@@ -76,10 +86,15 @@ namespace CryptoCommon.Services
             return binanceC2CTradeHistory ?? new BinanceC2CTradeHistory();
         }
 
-        public async Task<BinanceOrdersHistory> GetSpotOrdersHistoryAsync(List<string> symbols, int yearsToRead = 2)
+        public async Task<BinanceOrdersHistory> GetSpotOrdersHistoryAsync(List<string> symbols, bool forceSync = false)
         {
             var userId = "1111"; //TODO: handle it
-
+            if (!forceSync)
+            {
+                var history = await ordersHistoryRepository.FindOneAsync(x => x.UserId.Equals(userId));
+                if (history != null)
+                    return history;
+            }
             BinanceOrdersHistory binanceOrdersHistory = new BinanceOrdersHistory();
             binanceOrdersHistory.UserId = userId;
             binanceOrdersHistory.History = new List<BinanceOrderHistory>();
@@ -125,9 +140,12 @@ namespace CryptoCommon.Services
             var c2cHistory = await GetC2CTradeHistoryAsync(Side.BUY, yearsToRead);
             var investedAmount = await GetInvestedAmountAsync(c2cHistory);
             var ordersHistory = await GetSpotOrdersHistoryAsync(symbols);
+            var spotTradesHistory = await GetSpotTradesHistoryAsync(symbols);
+
             bool isNewWallet = false;
             bool isNewTradeHistory = false;
             bool isNewOrdersHistory = false;
+            bool isNewSpotTradeHistory = false;
 
             var wallet = await walletRepository.FindOneAsync(x => x.UserId.Equals(userId));
             if (wallet == null || string.IsNullOrEmpty(wallet.UserId))
@@ -157,8 +175,19 @@ namespace CryptoCommon.Services
                 allOrders.History = new List<BinanceOrderHistory>();
                 allOrders.Total = 0;
             }
-            allOrders.History.AddRange(ordersHistory?.History);
+            allOrders.History = ordersHistory?.History;
             allOrders.Total += ordersHistory?.History?.Count();
+
+            var spotTrades = await userTradesRepository.FindOneAsync(x => x.UserId.Equals(userId));
+            if(spotTrades == null || string.IsNullOrEmpty(spotTrades.UserId))
+            {
+                isNewSpotTradeHistory = true;
+                spotTrades = new BinanceUserTrades();
+                spotTrades.UserId = userId;
+                spotTrades.Trades = new List<BinanceUserTradeSymbolInfo>();
+            }
+            spotTrades.Trades = spotTradesHistory.Trades;
+
 
             if (saveToDb)
                 if (!isNewWallet)
@@ -175,6 +204,11 @@ namespace CryptoCommon.Services
                 await ordersHistoryRepository.ReplaceOneAsync(allOrders);
             else
                 await ordersHistoryRepository.InsertOneAsync(allOrders);
+
+            if (!isNewSpotTradeHistory)
+                await userTradesRepository.ReplaceOneAsync(spotTrades);
+            else
+                await userTradesRepository.InsertOneAsync(spotTrades);
 
             return wallet;
         }
@@ -224,10 +258,15 @@ namespace CryptoCommon.Services
             return source;
         }
 
-        public async Task<BinanceUserTrades> GetSpotTradesHistoryAsync(List<string> symbols)
+        public async Task<BinanceUserTrades> GetSpotTradesHistoryAsync(List<string> symbols, bool forceSync = false)
         {
             var userId = "1111"; //TODO: handle it
-
+            if (!forceSync)
+            {
+                var history = await userTradesRepository.FindOneAsync(x => x.UserId.Equals(userId));
+                if (history != null)
+                    return history;
+            }
             BinanceUserTrades binanceUserTrades = new BinanceUserTrades();
             binanceUserTrades.UserId = userId;
             binanceUserTrades.Trades = new List<BinanceUserTradeSymbolInfo>();
