@@ -35,5 +35,7 @@ namespace CryptoCommon.Services.Interfaces
         /// <param name="yearsToRead">How many years to read data</param>
         /// <returns></returns>
         Task<Wallet> SyncWalletAsync(List<string> symbols, int yearsToRead = 2, bool saveToDb = true);
+        Task<CoinInfoWallet> GetCoinInfoAsync(string symbol, bool forceSync = false);
+        Task<List<CoinInfoWallet>> GetCoinInfoAsync(List<string> symbol, bool forceSync = false);
     }
 }

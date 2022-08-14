@@ -179,7 +179,7 @@ namespace CryptoCommon.Services
             allOrders.Total += ordersHistory?.History?.Count();
 
             var spotTrades = await userTradesRepository.FindOneAsync(x => x.UserId.Equals(userId));
-            if(spotTrades == null || string.IsNullOrEmpty(spotTrades.UserId))
+            if (spotTrades == null || string.IsNullOrEmpty(spotTrades.UserId))
             {
                 isNewSpotTradeHistory = true;
                 spotTrades = new BinanceUserTrades();
@@ -189,7 +189,20 @@ namespace CryptoCommon.Services
             spotTrades.Trades = spotTradesHistory.Trades;
 
 
-            if (saveToDb)
+            ///UPDATE WALLET ABOUT COINS INFO
+            if (spotTrades.Trades != null && spotTrades.Trades.Any())
+            {
+                var coinfoInfoWallet = await GetCoinInfoAsync(symbols, true);
+                if(coinfoInfoWallet != null)
+                {
+                    wallet.Coins = coinfoInfoWallet;
+                }
+                else
+                {
+                    wallet.Coins = new List<CoinInfoWallet>();
+                }
+            }
+
                 if (!isNewWallet)
                     await walletRepository.ReplaceOneAsync(wallet);
                 else
@@ -297,6 +310,71 @@ namespace CryptoCommon.Services
             }
 
             return binanceUserTrades;
+        }
+        public async Task<CoinInfoWallet> GetCoinInfoAsync(string symbol, bool forceSync = false)
+        {
+            var userId = "1111"; //TODO: handle it;
+            if (!forceSync)
+            {
+                var wallet = await walletRepository.FindOneAsync(x => x.UserId.Equals(userId));
+                if (wallet != null && wallet.Coins != null && wallet.Coins.Any())
+                {
+                    var coinInfo = wallet.Coins.FirstOrDefault(x => x.Symbol.Equals(symbol));
+                    if (coinInfo != null)
+                        return coinInfo;
+                }
+            }
+            var trades = await GetSpotTradesHistoryAsync(new List<string> { symbol }, forceSync);
+            if (trades != null && trades.Trades != null)
+            {
+                var symbolTrades = trades.Trades.FirstOrDefault(x => x.Symbol.Equals(symbol));
+                if (symbolTrades != null && symbolTrades.Data != null && symbolTrades.Data.Any())
+                {
+                    var cointQty = symbolTrades.Data.Sum(x => x.Qty); //number of bought
+                    var quoteQty = symbolTrades.Data.Sum(x => x.QuoteQty); //value of spend money
+                    return new CoinInfoWallet()
+                    {
+                        Amount = cointQty,
+                        AveragePrice = quoteQty,
+                        Symbol = symbol
+                    };
+                }
+            }
+            return new CoinInfoWallet();
+        }
+        public async Task<List<CoinInfoWallet>> GetCoinInfoAsync(List<string> symbol, bool forceSync = false)
+        {
+            var userId = "1111"; //TODO: handle it;
+            if (!forceSync)
+            {
+                var wallet = await walletRepository.FindOneAsync(x => x.UserId.Equals(userId));
+                if (wallet != null && wallet.Coins != null && wallet.Coins.Any())
+                {
+                    return wallet.Coins;
+                }
+            }
+            var trades = await GetSpotTradesHistoryAsync(symbol, forceSync);
+            List<CoinInfoWallet> coinInfoWallet = new List<CoinInfoWallet>();
+            if (trades != null && trades.Trades != null)
+            {
+                foreach (var symb in symbol)
+                {
+                    var symbolTrades = trades.Trades.FirstOrDefault(x => x.Symbol.Equals(symb));
+                    if (symbolTrades != null && symbolTrades.Data != null && symbolTrades.Data.Any())
+                    {
+                        var cointQty = symbolTrades.Data.Sum(x => x.Qty); //number of bought
+                        var quoteQty = symbolTrades.Data.Sum(x => x.QuoteQty); //value of spend money
+                        var coinInfo = new CoinInfoWallet()
+                        {
+                            Amount = cointQty,
+                            AveragePrice = quoteQty / cointQty,
+                            Symbol = symb
+                        };
+                        coinInfoWallet.Add(coinInfo);
+                    }
+                }
+            }
+            return coinInfoWallet;
         }
     }
 }
