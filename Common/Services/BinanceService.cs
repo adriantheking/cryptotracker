@@ -79,12 +79,7 @@ namespace CryptoCommon.Services
         public async Task<BinanceOrdersHistory> GetSpotOrdersHistoryAsync(List<string> symbols, int yearsToRead = 2)
         {
             var userId = "1111"; //TODO: handle it
-            var stopYear = DateTime.Now.AddYears(-yearsToRead);
-            var endDay = DateTime.UtcNow;
-            var startDay = endDay.AddDays(-30);
 
-            var endTimespan = ((DateTimeOffset)endDay).ToUnixTimeMilliseconds(); //ends today
-            var startTimespan = ((DateTimeOffset)startDay).ToUnixTimeMilliseconds(); //start 30days before
             BinanceOrdersHistory binanceOrdersHistory = new BinanceOrdersHistory();
             binanceOrdersHistory.UserId = userId;
             binanceOrdersHistory.History = new List<BinanceOrderHistory>();
@@ -154,7 +149,7 @@ namespace CryptoCommon.Services
             c2cTradeHistory.Total = c2cHistory.Total;
 
             var allOrders = await ordersHistoryRepository.FindOneAsync(x => x.UserId.Equals(userId));
-            if(allOrders == null || string.IsNullOrEmpty(allOrders.UserId))
+            if (allOrders == null || string.IsNullOrEmpty(allOrders.UserId))
             {
                 isNewOrdersHistory = true;
                 allOrders = new BinanceOrdersHistory();
@@ -227,6 +222,42 @@ namespace CryptoCommon.Services
             };
 
             return source;
+        }
+
+        public async Task<BinanceUserTrades> GetSpotTradesHistoryAsync(List<string> symbols)
+        {
+            var userId = "1111"; //TODO: handle it
+
+            BinanceUserTrades binanceUserTrades = new BinanceUserTrades();
+            binanceUserTrades.UserId = userId;
+            binanceUserTrades.Trades = new List<BinanceUserTradeSymbolInfo>();
+
+            foreach (var symbol in symbols)
+            {
+                BinanceUserTradeSymbolInfo userTradeSymbolInfo = new BinanceUserTradeSymbolInfo();
+                userTradeSymbolInfo.Symbol = symbol;
+                try
+                {
+                    var trades = await binance.GetTradesListAsync(symbol);
+                    if (trades != null && trades.Any())
+                    {
+                        var items = mapper.Map<List<BinanceModel.BinanceTradesHistoryModel>, List<BinanceUserTrade>>(trades);
+                        userTradeSymbolInfo.Data = items;
+                        binanceUserTrades.Trades.Add(userTradeSymbolInfo);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, ex?.Message, ex?.InnerException);
+                    throw;
+                }
+            }
+
+            return binanceUserTrades;
         }
     }
 }

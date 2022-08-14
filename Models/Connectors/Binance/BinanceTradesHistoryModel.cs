@@ -11,10 +11,10 @@ namespace Models.Connectors.Binance
         public int? Id { get; set; }
 
         [JsonProperty("orderId")]
-        public int? OrderId { get; set; }
+        public long? OrderId { get; set; }
 
         [JsonProperty("orderListId")]
-        public int? OrderListId { get; set; }
+        public long? OrderListId { get; set; }
 
         [JsonProperty("price")]
         public decimal? Price { get; set; }
