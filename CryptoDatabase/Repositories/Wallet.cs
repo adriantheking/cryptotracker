@@ -21,6 +21,7 @@ namespace CryptoDatabase.Repositories
         public string? Symbol { get; set; }
         public string? Source { get; set; }
         public decimal? AveragePrice { get; set; }
+        public decimal? TotalInvested { get; set; }
         public decimal? Amount { get; set; }
     }
 }

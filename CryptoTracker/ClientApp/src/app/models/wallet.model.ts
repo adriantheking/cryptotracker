@@ -16,4 +16,6 @@ export interface ICoinInfoWallet{
     symbol?: string;
     averagePrice?: number;
     amount?: number;
+    source?: string;
+    totalInvested?: number;
 }

@@ -192,7 +192,7 @@ namespace CryptoCommon.Services
             ///UPDATE WALLET ABOUT COINS INFO
             if (spotTrades.Trades != null && spotTrades.Trades.Any())
             {
-                var coinfoInfoWallet = await GetCoinInfoAsync(symbols, true);
+                var coinfoInfoWallet = await GetCoinInfoAsync(symbols, true); //no need force refresh here all data has been already refreshed
                 if(coinfoInfoWallet != null)
                 {
                     wallet.Coins = coinfoInfoWallet;
@@ -330,14 +330,25 @@ namespace CryptoCommon.Services
                 var symbolTrades = trades.Trades.FirstOrDefault(x => x.Symbol.Equals(symbol));
                 if (symbolTrades != null && symbolTrades.Data != null && symbolTrades.Data.Any())
                 {
-                    var cointQty = symbolTrades.Data.Sum(x => x.Qty); //number of bought
-                    var quoteQty = symbolTrades.Data.Sum(x => x.QuoteQty); //value of spend money
+                    var buyerData = symbolTrades.Data.Where(x => x.IsBuyer.HasValue && x.IsBuyer.Value);
+                    var sellerData = symbolTrades.Data.Where(x => x.IsBuyer.HasValue && !x.IsBuyer.Value);
+
+                    var buyerCoinQty = buyerData.Sum(x => x.Qty);
+                    var buyerQuoteQty = buyerData.Sum(x => x.QuoteQty);
+                    var sellerCoinQty = sellerData.Sum(x => x.Qty);
+                    var sellerQuoteQty = sellerData.Sum(x => x.QuoteQty);
+
+
+                    var cointQty = buyerCoinQty - sellerCoinQty; //number of bought
+                    var quoteQty = buyerQuoteQty - sellerQuoteQty; //value of spend money
+
                     return new CoinInfoWallet()
                     {
                         Amount = cointQty,
                         AveragePrice = quoteQty,
                         Symbol = symbol,
-                        Source = nameof(IBinance)
+                        Source = nameof(IBinance),
+                        TotalInvested = quoteQty
                     };
                 }
             }
@@ -355,29 +366,58 @@ namespace CryptoCommon.Services
                 }
             }
             var trades = await GetSpotTradesHistoryAsync(symbol, forceSync);
+            var spotOrders = await GetSpotOrdersHistoryAsync(symbol, forceSync);
+
             List<CoinInfoWallet> coinInfoWallet = new List<CoinInfoWallet>();
             if (trades != null && trades.Trades != null)
             {
                 foreach (var symb in symbol)
                 {
                     var symbolTrades = trades.Trades.FirstOrDefault(x => x.Symbol.Equals(symb));
+                    var symbolOrders = spotOrders.History.FirstOrDefault(x => x.Symbol.Equals(symb));
+                    var coinInfo = new CoinInfoWallet();
+                    decimal? cointQty = 0;
+                    decimal? quoteQty = 0;
+
                     if (symbolTrades != null && symbolTrades.Data != null && symbolTrades.Data.Any())
                     {
-                        var buyerCoinQty = symbolTrades.Data.Where(x => x.IsBuyer.HasValue && x.IsBuyer.Value).Sum(x => x.Qty);
-                        var buyerQuoteQty = symbolTrades.Data.Where(x => x.IsBuyer.HasValue && x.IsBuyer.Value).Sum(x => x.QuoteQty);
-                        var sellerCoinQty = symbolTrades.Data.Where(x => x.IsBuyer.HasValue && !x.IsBuyer.Value).Sum(x => x.Qty);
-                        var sellerQuoteQty = symbolTrades.Data.Where(x => x.IsBuyer.HasValue && !x.IsBuyer.Value).Sum(x => x.QuoteQty);
+                        var buyerData = symbolTrades.Data.Where(x => x.IsBuyer.HasValue && x.IsBuyer.Value);
+                        var sellerData = symbolTrades.Data.Where(x => x.IsBuyer.HasValue && !x.IsBuyer.Value);
 
-                        var cointQty = buyerCoinQty - sellerCoinQty; //number of bought
-                        var quoteQty = buyerQuoteQty - sellerQuoteQty; //value of spend money
-                        var coinInfo = new CoinInfoWallet()
+                        var buyerCoinQty = buyerData.Sum(x => x.Qty);
+                        var buyerQuoteQty = buyerData.Sum(x => x.QuoteQty);
+                        var sellerCoinQty = sellerData.Sum(x => x.Qty);
+                        var sellerQuoteQty = sellerData.Sum(x => x.QuoteQty);
+
+
+                         cointQty = buyerCoinQty - sellerCoinQty; //number of bought
+                         quoteQty = buyerQuoteQty - sellerQuoteQty; //value of spend money
+
+                        coinInfo = new CoinInfoWallet
                         {
                             Amount = cointQty,
                             AveragePrice = quoteQty / cointQty,
-                            Symbol = symb
+                            Symbol = symb,
+                            Source = nameof(IBinance),
+                            TotalInvested = quoteQty
                         };
-                        coinInfoWallet.Add(coinInfo);
                     }
+                    if(symbolOrders != null && symbolOrders.Data != null && symbolOrders.Data.Any())
+                    {
+                        var buyerData = symbolOrders.Data.Where(x => x.Side == Side.BUY && x.Type == "LIMIT" && x.Status == "FILLED");
+                        var sellerData = symbolOrders.Data.Where(x => x.Side == Side.SELL && x.Type == "LIMIT" && x.Status == "FILLED");
+
+                        var buyerCoinQty = buyerData.Sum(x => x.ExecutedQty);
+                        var buyerQuoteQty = buyerData.Sum(x => x.CummulativeQuoteQty);
+                        var sellerCoinQty = sellerData.Sum(x => x.ExecutedQty);
+                        var sellerQuoteQty = sellerData.Sum(x => x.CummulativeQuoteQty);
+
+                        cointQty += buyerCoinQty - sellerCoinQty; //number of bought
+                        quoteQty += buyerQuoteQty - sellerQuoteQty; //value of spend money
+                        coinInfo.Amount = cointQty;
+                        coinInfo.AveragePrice = quoteQty / cointQty;
+                    }
+                    coinInfoWallet.Add(coinInfo);
                 }
             }
             return coinInfoWallet;
