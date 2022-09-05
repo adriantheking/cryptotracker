@@ -53,5 +53,7 @@ namespace CryptoCommon.Services.Interfaces
         /// </summary>
         /// <returns></returns>
         Task<List<string>> GetSupportedCombinationCoinsAsync();
+
+        Task<List<BinanceTickers>> GetTickersAsync(bool forceSync = false);
     }
 }

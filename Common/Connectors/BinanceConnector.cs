@@ -100,5 +100,22 @@ namespace CryptoCommon.Connectors
                 throw;
             }
         }
+
+        public async Task<List<BinancePriceTickerModel>> GetPriceTicker(string? symbol = null, string? symbols = null)
+        {
+            var market = new Market(httpClient, options.BaseUrl, options.PublicKey, options.PrivateKey);
+            
+            try
+            {
+                var result = await market.SymbolPriceTicker(symbol, symbols);
+
+                return JsonConvert.DeserializeObject<List<BinancePriceTickerModel>>(result);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, e?.Message, e?.InnerException);
+                throw;
+            }
+        }
     }
 }

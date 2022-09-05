@@ -14,15 +14,18 @@ namespace CryptoTracker.Controllers
     {
         private readonly IAppCache cache;
         private readonly IBinanceService binanceService;
+        private readonly IBinance binance;
         private readonly IBinanceSeed seed;
 
         public BinanceController(ILogger<BinanceController> logger,
             IAppCache cache,
             IBinanceService binanceService,
+            IBinance binance,
             IBinanceSeed seed)
         {
             this.cache = cache;
             this.binanceService = binanceService;
+            this.binance = binance;
             this.seed = seed;
         }
 
@@ -50,6 +53,23 @@ namespace CryptoTracker.Controllers
             return await binanceService.GetSpotTradesHistoryAsync(new List<string> { "BTCUSDT", "ETHUSDT" });
         }
 
+        [HttpPost("SyncTickers")]
+        public async Task SyncTickers()
+        {
+            await binanceService.GetTickersAsync(true);
+        }
+
+        [HttpGet(nameof(GetTickers))]
+        public async Task<object> GetTickers()
+        {
+            return await binanceService.GetTickersAsync();
+        }
+
+        [HttpGet("Test")]
+        public async Task<object> Test()
+        {
+            return await binance.GetPriceTicker(string.Empty, string.Empty);
+        }
 
         [HttpGet("Seed")]
         public async Task Seed()

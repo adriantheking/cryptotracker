@@ -8,6 +8,7 @@ using CryptoDatabase.Repositories;
 using CryptoDatabase.Repositories.Binance;
 using CryptoDatabase.Repositories.Interfaces;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using BinanceModel = Models.Connectors.Binance;
 
 namespace CryptoCommon.Services
@@ -23,6 +24,7 @@ namespace CryptoCommon.Services
         private readonly IMongoRepository<BinanceUserTrades> userTradesRepository;
         private readonly IMongoRepository<BinanceSupportedCoins> supportedCoinsRepository;
         private readonly IMongoRepository<BinanceSupportedStables> supportedStablesRepository;
+        private readonly IMongoRepository<BinanceTickers> binanceTickersRepository;
 
         public BinanceService(ILogger<BinanceService> logger,
             IMapper mapper,
@@ -32,7 +34,8 @@ namespace CryptoCommon.Services
             IMongoRepository<BinanceOrdersHistory> ordersHistoryRepository,
             IMongoRepository<BinanceUserTrades> userTradesRepository,
             IMongoRepository<BinanceSupportedCoins> supportedCoinsRepository,
-            IMongoRepository<BinanceSupportedStables> supportedStablesRepository)
+            IMongoRepository<BinanceSupportedStables> supportedStablesRepository,
+            IMongoRepository<BinanceTickers> binanceTickersRepository)
         {
             this.logger = logger;
             this.mapper = mapper;
@@ -43,6 +46,7 @@ namespace CryptoCommon.Services
             this.userTradesRepository = userTradesRepository;
             this.supportedCoinsRepository = supportedCoinsRepository;
             this.supportedStablesRepository = supportedStablesRepository;
+            this.binanceTickersRepository = binanceTickersRepository;
         }
 
         public async Task<BinanceC2CTradeHistory> GetC2CTradeHistoryAsync(Side side, int yearsToRead = 2, bool forceSync = false)
@@ -476,6 +480,35 @@ namespace CryptoCommon.Services
 
 
             return output;
+        }
+
+        public async Task<List<BinanceTickers>> GetTickersAsync(bool forceSync = false)
+        {
+            if (!forceSync)
+            {
+                return  binanceTickersRepository.AsQueryable().ToList().OrderByDescending(x => x.CreatedAt).ToList();
+            }
+
+            try
+            {
+                var tickersModel = await binance.GetPriceTicker();
+                var tickers =
+                    mapper.Map<List<BinanceModel.BinancePriceTickerModel>, List<BinancePriceTicker>>(tickersModel);
+                var output = new List<BinanceTickers>();
+                var ticker = new BinanceTickers()
+                {
+                    Tickers = tickers
+                };
+                await binanceTickersRepository.InsertOneAsync(ticker);
+                output.Add(ticker);
+
+                return output;
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, e?.Message, e?.InnerException);
+                throw;
+            }
         }
     }
 }

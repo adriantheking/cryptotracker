@@ -41,5 +41,15 @@ namespace CryptoCommon.Connectors.Interfaces
         /// <param name="recvWindow"></param>
         /// <returns></returns>
         Task<List<BinanceTradesHistoryModel>> GetTradesListAsync(string symbol, long? orderId = null, long? startTime = null, long? endTime = null, long? fromId = null, int? limit = 500, long? recvWindow = null);
+        /// <summary>
+        /// Returns tickers for symbols
+        /// </summary>
+        /// <param name="symbol">Parameter symbol and symbols cannot be used in combination.
+        /// If neither parameter is sent, prices for all symbols will be returned in an array.</param>
+        /// <param name="symbols">Examples of accepted format for the symbols parameter: ["BTCUSDT","BNBUSDT"]
+        /// or
+        /// %5B%22BTCUSDT%22,%22BNBUSDT%22%5D</param>
+        /// <returns></returns>
+        Task<List<BinancePriceTickerModel>> GetPriceTicker(string? symbol = null, string? symbols = null);
     }
 }

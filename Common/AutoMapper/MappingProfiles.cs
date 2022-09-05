@@ -13,6 +13,7 @@ namespace CryptoCommon.AutoMapper
             CreateMap<BinanceModel.BinanceC2CTradeHistoryData, BinanceC2CTradeHistoryData>();
             CreateMap<BinanceModel.BinanceAllOrdersHistoryModel, BinanceAllOrdersHistory>();
             CreateMap<BinanceModel.BinanceTradesHistoryModel, BinanceUserTrade>();
+            CreateMap<BinanceModel.BinancePriceTickerModel, BinancePriceTicker>();
             CreateMap<ZondaModel.ZondaOperationHistoryModel, ZondaOperationHistory>();
             CreateMap<ZondaModel.ZondaOperationHistoryItemModel, ZondaOperationHistoryItem>();
             CreateMap<ZondaModel.ZondaOperationHistoryBalanceModel, ZondaOperationHistoryBalance>();
