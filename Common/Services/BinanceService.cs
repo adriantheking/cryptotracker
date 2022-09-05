@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Security.Cryptography.X509Certificates;
+using AutoMapper;
 using Binance.Spot.Models;
 using CryptoCommon.Connectors.Interfaces;
 using CryptoCommon.Services.Interfaces;
@@ -20,6 +21,8 @@ namespace CryptoCommon.Services
         private readonly IMongoRepository<Wallet> walletRepository;
         private readonly IMongoRepository<BinanceOrdersHistory> ordersHistoryRepository;
         private readonly IMongoRepository<BinanceUserTrades> userTradesRepository;
+        private readonly IMongoRepository<BinanceSupportedCoins> supportedCoinsRepository;
+        private readonly IMongoRepository<BinanceSupportedStables> supportedStablesRepository;
 
         public BinanceService(ILogger<BinanceService> logger,
             IMapper mapper,
@@ -27,7 +30,9 @@ namespace CryptoCommon.Services
             IMongoRepository<CryptoDatabase.Repositories.Binance.BinanceC2CTradeHistory> c2cRepository,
             IMongoRepository<Wallet> walletRepository,
             IMongoRepository<BinanceOrdersHistory> ordersHistoryRepository,
-            IMongoRepository<BinanceUserTrades> userTradesRepository)
+            IMongoRepository<BinanceUserTrades> userTradesRepository,
+            IMongoRepository<BinanceSupportedCoins> supportedCoinsRepository,
+            IMongoRepository<BinanceSupportedStables> supportedStablesRepository)
         {
             this.logger = logger;
             this.mapper = mapper;
@@ -36,6 +41,8 @@ namespace CryptoCommon.Services
             this.walletRepository = walletRepository;
             this.ordersHistoryRepository = ordersHistoryRepository;
             this.userTradesRepository = userTradesRepository;
+            this.supportedCoinsRepository = supportedCoinsRepository;
+            this.supportedStablesRepository = supportedStablesRepository;
         }
 
         public async Task<BinanceC2CTradeHistory> GetC2CTradeHistoryAsync(Side side, int yearsToRead = 2, bool forceSync = false)
@@ -73,7 +80,7 @@ namespace CryptoCommon.Services
                 catch (Exception ex)
                 {
                     logger.LogError(ex, ex?.Message, ex?.InnerException);
-                    throw;
+                    continue;
                 }
 
                 //increase counters
@@ -116,7 +123,7 @@ namespace CryptoCommon.Services
                 catch (Exception ex)
                 {
                     logger.LogError(ex, ex?.Message, ex?.InnerException);
-                    throw;
+                    continue;
                 }
             }
 
@@ -305,7 +312,7 @@ namespace CryptoCommon.Services
                 catch (Exception ex)
                 {
                     logger.LogError(ex, ex?.Message, ex?.InnerException);
-                    throw;
+                    continue;
                 }
             }
 
@@ -378,7 +385,14 @@ namespace CryptoCommon.Services
                     var coinInfo = new CoinInfoWallet();
                     decimal? cointQty = 0;
                     decimal? quoteQty = 0;
-
+                    coinInfo = new CoinInfoWallet
+                    {
+                        Amount = cointQty,
+                        AveragePrice = 0,
+                        Symbol = symb,
+                        Source = nameof(IBinance),
+                        TotalInvested = quoteQty
+                    };
                     if (symbolTrades != null && symbolTrades.Data != null && symbolTrades.Data.Any())
                     {
                         var buyerData = symbolTrades.Data.Where(x => x.IsBuyer.HasValue && x.IsBuyer.Value);
@@ -392,15 +406,10 @@ namespace CryptoCommon.Services
 
                          cointQty = buyerCoinQty - sellerCoinQty; //number of bought
                          quoteQty = buyerQuoteQty - sellerQuoteQty; //value of spend money
+                         coinInfo.Amount = cointQty;
+                         coinInfo.AveragePrice = quoteQty / cointQty;
+                         coinInfo.TotalInvested = quoteQty;
 
-                        coinInfo = new CoinInfoWallet
-                        {
-                            Amount = cointQty,
-                            AveragePrice = quoteQty / cointQty,
-                            Symbol = symb,
-                            Source = nameof(IBinance),
-                            TotalInvested = quoteQty
-                        };
                     }
                     if(symbolOrders != null && symbolOrders.Data != null && symbolOrders.Data.Any())
                     {
@@ -416,11 +425,57 @@ namespace CryptoCommon.Services
                         quoteQty += buyerQuoteQty - sellerQuoteQty; //value of spend money
                         coinInfo.Amount = cointQty;
                         coinInfo.AveragePrice = quoteQty / cointQty;
+                        coinInfo.TotalInvested = quoteQty;
                     }
-                    coinInfoWallet.Add(coinInfo);
+                    if(coinInfo.Amount > (decimal)0.000001 && coinInfo.AveragePrice > (decimal)0.000001)
+                        coinInfoWallet.Add(coinInfo);
                 }
             }
             return coinInfoWallet;
+        }
+
+        public async Task<List<BinanceSupportedStables>> GetSupportedStablesAsync()
+        {
+            try
+            {
+                return this.supportedStablesRepository.AsQueryable().ToList();
+            }
+            catch (Exception e)
+            {
+                this.logger.LogError(e, e?.Message, e?.InnerException);
+                throw;
+            }
+        }
+
+        public async Task<List<BinanceSupportedCoins>> GetSupportedCoinsAsync()
+        {
+            try
+            {
+                return this.supportedCoinsRepository.AsQueryable().ToList();
+            }
+            catch (Exception e)
+            {
+                this.logger.LogError(e, e?.Message, e?.InnerException);
+                throw;
+            }
+        }
+
+        public async Task<List<string>> GetSupportedCombinationCoinsAsync()
+        {
+            var supportedStables = await this.GetSupportedStablesAsync();
+            var supportedCoins = await this.GetSupportedCoinsAsync();
+            var output = new List<string>();
+
+            supportedCoins.ForEach(coin =>
+            {
+                supportedStables.ForEach(stable =>
+                {
+                    output.Add((coin.Name + stable.Name).ToUpper());
+                });
+            });
+
+
+            return output;
         }
     }
 }

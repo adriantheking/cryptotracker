@@ -37,5 +37,21 @@ namespace CryptoCommon.Services.Interfaces
         Task<Wallet> SyncWalletAsync(List<string> symbols, int yearsToRead = 2, bool saveToDb = true);
         Task<CoinInfoWallet> GetCoinInfoAsync(string symbol, bool forceSync = false);
         Task<List<CoinInfoWallet>> GetCoinInfoAsync(List<string> symbol, bool forceSync = false);
+        /// <summary>
+        /// Returns list of supported stable coins with should be included in trades orders etc
+        /// </summary>
+        /// <returns></returns>
+        Task<List<BinanceSupportedStables>> GetSupportedStablesAsync();
+        /// <summary>
+        /// Returns list of supported coins what should be synchronized and everything
+        /// </summary>
+        /// <returns></returns>
+        Task<List<BinanceSupportedCoins>> GetSupportedCoinsAsync();
+
+        /// <summary>
+        /// returns final coins supported by binance in format: CRYPTOSTABLE: BTCUSDT, BTCBUSDT, ETHUSDT etc...
+        /// </summary>
+        /// <returns></returns>
+        Task<List<string>> GetSupportedCombinationCoinsAsync();
     }
 }

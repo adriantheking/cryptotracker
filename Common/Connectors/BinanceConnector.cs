@@ -1,4 +1,5 @@
-﻿using Binance.Spot;
+﻿using Binance.Common;
+using Binance.Spot;
 using Binance.Spot.Models;
 using CryptoCommon.Connectors.Interfaces;
 using CryptoCommon.Options;
@@ -23,9 +24,13 @@ namespace CryptoCommon.Connectors
             IOptions<BinanceConnectorOptions> options)
         {
             this.logger = logger;
-            this.httpClient = httpClient;
             this.options = options?.Value ?? new BinanceConnectorOptions();
 
+#if RELEASE
+            this.httpClient = httpClient;
+#else
+            this.httpClient = new HttpClient(handler: new BinanceLoggingHandler(logger: logger));
+#endif
             this.httpClient.BaseAddress = new Uri(this.options.BaseUrl);
         }
 

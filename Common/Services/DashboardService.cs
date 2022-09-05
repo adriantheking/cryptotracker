@@ -43,8 +43,9 @@ namespace CryptoCommon.Services
         {
             try
             {
+                var binanceSupportedCombinations = await binanceService.GetSupportedCombinationCoinsAsync();
                 var zondaWallet = await zondaService.SyncWalletAsync(false);
-                var binanceWallet = await binanceService.SyncWalletAsync(symbols: new List<string> { "BTCUSDT", "ETHUSDT", "BNBBTC" }, saveToDb: false);
+                var binanceWallet = await binanceService.SyncWalletAsync(symbols: binanceSupportedCombinations, saveToDb: false);
                 var isNewWallet = false;
                 var wallet = await walletRepository.FindOneAsync(x => x.UserId.Equals(userId));
                 if (wallet == null || string.IsNullOrEmpty(wallet.UserId))
