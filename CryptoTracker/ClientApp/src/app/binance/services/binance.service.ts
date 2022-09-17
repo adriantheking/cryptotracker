@@ -33,10 +33,9 @@ export class BinanceService {
 
 
 
-  public CalculateCoinsWorth(): Promise<BinanceCoinsValueModel[]> {
+  public CalculateCoinsValue(): Promise<BinanceCoinsValueModel[]> {
     return new Promise(resolver => {
       var output: BinanceCoinsValueModel[] = [];
-
       this.GetWallet().subscribe(wallet => {
         this.GetTickers().subscribe(tickerData => {
           if (wallet.coins != undefined) {
@@ -54,5 +53,18 @@ export class BinanceService {
         })
       })
     });
+  }
+
+  public CalculateCoinsWeight(): Promise<BinanceCoinsValueModel[]> {
+    return new Promise(resolver => {
+      this.CalculateCoinsValue().then(result => {
+        var valueOfAllCoins = result.reduce((a, b) => a + b.value!, 0);
+        for(var i=0; i<result.length; i++){
+          result[i].weight = (result[i].value! / valueOfAllCoins) * 100;
+        }
+
+        resolver(result);
+      })
+    })
   }
 }
