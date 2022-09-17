@@ -77,7 +77,7 @@ export class DashboardComponent implements OnInit {
 
       for(var i=0; i<coinsInfo.length; i++){
         this.pieChartData.labels?.push(coinsInfo[i].symbol!);
-        this.pieChartData.datasets[0].data.push(coinsInfo[i].weight!);  
+        this.pieChartData.datasets[0].data.push(Math.round(coinsInfo[i].weight! * 100) / 100);  
       }
     });
   }
