@@ -11,13 +11,14 @@ import { BinanceService } from '../../services/binance.service';
 export class DashboardComponent implements OnInit {
 
   public wallet: IWallet = {};
-  public tickers: BinanceTickersModel = {};
+  public tickers: BinanceTickersModel[] = [];
   
   constructor(private binanceService: BinanceService) { }
 
   ngOnInit(): void {
     this.getWallet();
     this.getTickers();
+    this.binanceService.CalculateCoinsWorth().then( x => console.log(x));
   }
 
   private getWallet(){
