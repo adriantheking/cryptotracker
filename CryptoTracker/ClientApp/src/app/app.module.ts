@@ -11,6 +11,7 @@ import { CounterComponent } from './counter/counter.component';
 import { FetchDataComponent } from './fetch-data/fetch-data.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { NgChartsModule } from 'ng2-charts';
+import { BinanceModule } from './binance/binance.module';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { NgChartsModule } from 'ng2-charts';
     DashboardComponent
   ],  
   imports: [
+    BinanceModule,
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
     HttpClientModule,
     FormsModule,

@@ -502,7 +502,7 @@ namespace CryptoCommon.Services
                 await binanceTickersRepository.InsertOneAsync(ticker);
                 output.Add(ticker);
 
-                return output;
+                return binanceTickersRepository.AsQueryable().ToList().OrderByDescending(x => x.CreatedAt).ToList();
             }
             catch (Exception e)
             {

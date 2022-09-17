@@ -1,0 +1,54 @@
+<div class="row">
+    <div class="col">Zainwestowane pieniądze per giełda</div>
+</div>
+<div class="row">
+    <div class="col">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Ilość</th>
+                    <th scope="col">Fiat</th>
+                    <th scope="col">Giełda</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of wallet.invested; index as i">
+                    <td>{{i}}</td>
+                    <td>{{item['value']}}</td>
+                    <td>{{item['fiat']}}</td>
+                    <td>{{item['source']}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col">Inwestycja per coin</div>
+</div>
+<div class="row">
+    <div class="col">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Ilość</th>
+                    <th scope="col">Średnia cena USD</th>
+                    <th scope="col">Zainwestowano w USD</th>
+                    <th scope="col">Symbol</th>
+                    <th scope="col">Giełda</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of wallet.coins; index as i">
+                    <td>{{i}}</td>
+                    <td>{{item['amount']}}</td>
+                    <td>{{item['averagePrice']}}</td>
+                    <td>{{item['totalInvested']}}</td>
+                    <td>{{item['symbol']}}</td>
+                    <td>{{item['source']}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
