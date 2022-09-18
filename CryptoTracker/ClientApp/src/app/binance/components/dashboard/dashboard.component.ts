@@ -116,22 +116,23 @@ export class DashboardComponent implements OnInit {
   constructor(private binanceService: BinanceService) { }
 
   ngOnInit(): void {
-    this.getWallet();
     this.getTickers();
+    this.getWallet();
 
   }
 
   private getWallet() {
-    this.binanceService.GetWallet().subscribe(x => {
+    this.binanceService.wallet$.subscribe(x => {
       this.wallet = x;
       this.preparePieChartWithCoinsWeight();
-    });
+    })
   }
 
   private getTickers() {
-    this.binanceService.GetTickers().subscribe(x => {
-      this.tickers = x;
-    });
+    this.binanceService.tickers$.subscribe(tickers => {
+      this.tickers = tickers;
+      this.preparePieChartWithCoinsWeight();
+    })
   }
 
   private preparePieChartWithCoinsWeight() {
